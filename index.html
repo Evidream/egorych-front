@@ -1,20 +1,68 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Егорыч</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Егорыч v0.1</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      background: #f8f8f8;
+    }
+    .message {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    .you { background: #d0f0ff; text-align: right; }
+    .bot { background: #e6ffe6; text-align: left; }
+    #chat { margin-bottom: 1rem; }
+    #sendBtn { padding: 0.5rem 1rem; }
+  </style>
 </head>
 <body>
-  <div id="chat-container">
-    <div id="chat"></div>
-    <div id="input-container">
-      <textarea id="userInput" placeholder="Напиши Егорычу..."></textarea>
-      <button onclick="sendMessage()">Отправить</button>
-      <button onclick="speakLast()">🎙️ Озвучить</button>
-    </div>
-  </div>
-  <script src="script.js"></script>
+  <div id="chat"></div>
+  <input id="messageInput" placeholder="Напиши Егорычу..." style="width: 70%; padding: 0.5rem;" />
+  <button id="sendBtn">Отправить</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const btn = document.getElementById("sendBtn");
+
+    const backendURL = "https://nodejs-production-78841.up.railway.app";
+
+    btn.onclick = async () => {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+
+      chat.innerHTML += `<div class="message you">${text}</div>`;
+
+      const res = await fetch(`${backendURL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      const reply = data.reply;
+      chat.innerHTML += `<div class="message bot">${reply}</div>`;
+
+      // Озвучка
+      const audioRes = await fetch(`${backendURL}/speak`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: reply })
+      });
+
+      const blob = await audioRes.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+    };
+  </script>
 </body>
 </html>
