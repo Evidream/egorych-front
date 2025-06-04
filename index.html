@@ -2,67 +2,110 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Егорыч v0.1</title>
+  <title>Егорыч 🤖</title>
   <style>
     body {
       font-family: sans-serif;
-      padding: 2rem;
+      padding: 30px;
+      background: #f7f7f7;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 15px;
+      background: white;
+      min-height: 300px;
       max-width: 600px;
       margin: auto;
-      background: #f8f8f8;
+      overflow-y: auto;
     }
-    .message {
-      margin: 1rem 0;
-      padding: 1rem;
-      border-radius: 10px;
+    .bubble {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      max-width: 80%;
     }
-    .you { background: #d0f0ff; text-align: right; }
-    .bot { background: #e6ffe6; text-align: left; }
-    #chat { margin-bottom: 1rem; }
-    #sendBtn { padding: 0.5rem 1rem; }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .bot {
+      background: #e3e3e3;
+      align-self: flex-start;
+    }
+    #inputArea {
+      max-width: 600px;
+      margin: 20px auto;
+      display: flex;
+      gap: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
   <div id="chat"></div>
-  <input id="messageInput" placeholder="Напиши Егорычу..." style="width: 70%; padding: 0.5rem;" />
-  <button id="sendBtn">Отправить</button>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
+    <button onclick="sendMessage()">➤</button>
+  </div>
 
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("messageInput");
-    const btn = document.getElementById("sendBtn");
+    const chatBox = document.getElementById("chat");
 
-    const backendURL = "https://nodejs-production-78841.up.railway.app";
+    function appendBubble(text, sender) {
+      const div = document.createElement("div");
+      div.className = `bubble ${sender}`;
+      div.innerText = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-    btn.onclick = async () => {
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
       const text = input.value.trim();
       if (!text) return;
+
+      appendBubble(text, "user");
       input.value = "";
 
-      chat.innerHTML += `<div class="message you">${text}</div>`;
+      try {
+        const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
 
-      const res = await fetch(`${backendURL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
-      });
+        const data = await res.json();
+        const reply = data.reply;
+        appendBubble(reply, "bot");
 
-      const data = await res.json();
-      const reply = data.reply;
-      chat.innerHTML += `<div class="message bot">${reply}</div>`;
+        // Озвучка
+        const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: reply }),
+        });
 
-      // Озвучка
-      const audioRes = await fetch(`${backendURL}/speak`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: reply })
-      });
-
-      const blob = await audioRes.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.play();
-    };
+        const audioBlob = await voiceRes.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+      } catch (err) {
+        appendBubble("Ошибка. Егорыч завис 🤯", "bot");
+        console.error(err);
+      }
+    }
   </script>
 </body>
 </html>
