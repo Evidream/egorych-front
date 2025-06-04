@@ -24,7 +24,7 @@ async function sendMessage() {
     },
     body: JSON.stringify({
       messages: [{ role: "user", content: message }],
-      chatbotId: "ТВОЙ_CHATBASE_CHATBOT_ID"
+      chatbotId: "5JFv8PIdG3zeZb0RvFsTr"
     })
   });
 
