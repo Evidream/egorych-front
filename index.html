@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Егорыч 🤖</title>
-  <script src="https://cdn.jsdelivr.net/npm/mic-recorder-to-mp3@2.2.1/dist/index.min.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 30px; background: #f7f7f7; }
+    body {
+      font-family: sans-serif;
+      padding: 30px;
+      background: #f7f7f7;
+    }
     #chat {
       border: 1px solid #ccc;
       border-radius: 12px;
@@ -22,16 +25,31 @@
       border-radius: 15px;
       max-width: 80%;
     }
-    .user { background: #dcf8c6; text-align: right; }
-    .bot { background: #e3e3e3; text-align: left; }
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .bot {
+      background: #e3e3e3;
+      align-self: flex-start;
+    }
     #inputArea {
       max-width: 600px;
       margin: 20px auto;
       display: flex;
       gap: 10px;
     }
-    input { flex: 1; padding: 10px; font-size: 16px; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -40,98 +58,67 @@
   <div id="inputArea">
     <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
     <button onclick="sendMessage()">➤</button>
-    <button id="micBtn">🎙️</button>
   </div>
+
   <script>
-    const chatBox = document.getElementById("chat");
-    let lastAudioUrl = null;
-    const recorder = new MicRecorder({ bitRate: 128 });
+  const chatBox = document.getElementById("chat");
+  let lastAudioUrl = null; // глобальная переменная
 
-    function appendBubble(text, sender) {
-      const div = document.createElement("div");
-      div.className = `bubble ${sender}`;
-      div.innerText = text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  function appendBubble(text, sender) {
+    const div = document.createElement("div");
+    div.className = `bubble ${sender}`;
+    div.innerText = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-    function appendAudioButton() {
-      const btn = document.createElement("button");
-      btn.innerText = "🔊 Послушать ответ";
-      btn.onclick = () => {
-        if (lastAudioUrl) new Audio(lastAudioUrl).play();
-      };
-      chatBox.appendChild(btn);
-    }
-
-    async function sendMessage() {
-      const input = document.getElementById("userInput");
-      const text = input.value.trim();
-      if (!text) return;
-      appendBubble(text, "user");
-      input.value = "";
-
-      try {
-        const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text })
-        });
-
-        const data = await res.json();
-        appendBubble(data.reply, "bot");
-
-        const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: data.reply })
-        });
-
-        const audioBlob = await voiceRes.blob();
-        lastAudioUrl = URL.createObjectURL(audioBlob);
-        appendAudioButton();
-      } catch (err) {
-        appendBubble("Ошибка. Егорыч завис 🤯", "bot");
-        console.error(err);
+  function appendAudioButton() {
+    const btn = document.createElement("button");
+    btn.innerText = "🔊 Послушать ответ";
+    btn.onclick = () => {
+      if (lastAudioUrl) {
+        const audio = new Audio(lastAudioUrl);
+        audio.play();
       }
-    }
-
-    document.getElementById("micBtn").onclick = () => {
-      recorder.start().then(() => {
-        document.getElementById("micBtn").innerText = "⏹️";
-        document.getElementById("micBtn").onclick = stopRecording;
-      });
     };
+    chatBox.appendChild(btn);
+  }
 
-    function stopRecording() {
-      recorder.stop().getMp3().then(([buffer, blob]) => {
-        const file = new File(buffer, "voice.mp3", { type: "audio/mp3" });
-        const formData = new FormData();
-        formData.append("audio", file);
+  async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim();
+    if (!text) return;
 
-        fetch("https://nodejs-production-78841.up.railway.app/whisper", {
-          method: "POST",
-          body: formData
-        })
-          .then(res => res.json())
-          .then(data => {
-            document.getElementById("userInput").value = data.text;
-            sendMessage();
-          })
-          .catch(err => {
-            appendBubble("Не удалось распознать речь", "bot");
-            console.error(err);
-          });
+    appendBubble(text, "user");
+    input.value = "";
+
+    try {
+      const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
       });
 
-      document.getElementById("micBtn").innerText = "🎙️";
-      document.getElementById("micBtn").onclick = () => {
-        recorder.start().then(() => {
-          document.getElementById("micBtn").innerText = "⏹️";
-          document.getElementById("micBtn").onclick = stopRecording;
-        });
-      };
+      const data = await res.json();
+      const reply = data.reply;
+      appendBubble(reply, "bot");
+
+      // Озвучку сохраняем, но не воспроизводим
+      const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: reply }),
+      });
+
+      const audioBlob = await voiceRes.blob();
+      lastAudioUrl = URL.createObjectURL(audioBlob);
+      appendAudioButton();
+
+    } catch (err) {
+      appendBubble("Ошибка. Егорыч завис 🤯", "bot");
+      console.error(err);
     }
-  </script>
+  }
+</script>
 </body>
 </html>
