@@ -1,14 +1,12 @@
+// === FRONTEND (index.html) ===
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <title>Егорыч 🤖</title>
+  <script src="https://cdn.jsdelivr.net/npm/mic-recorder-to-mp3@2.2.1/dist/index.min.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 30px;
-      background: #f7f7f7;
-    }
+    body { font-family: sans-serif; padding: 30px; background: #f7f7f7; }
     #chat {
       border: 1px solid #ccc;
       border-radius: 12px;
@@ -25,31 +23,16 @@
       border-radius: 15px;
       max-width: 80%;
     }
-    .user {
-      background: #dcf8c6;
-      align-self: flex-end;
-      text-align: right;
-    }
-    .bot {
-      background: #e3e3e3;
-      align-self: flex-start;
-    }
+    .user { background: #dcf8c6; text-align: right; }
+    .bot { background: #e3e3e3; text-align: left; }
     #inputArea {
       max-width: 600px;
       margin: 20px auto;
       display: flex;
       gap: 10px;
     }
-    input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    input { flex: 1; padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -60,11 +43,10 @@
     <button onclick="sendMessage()">➤</button>
     <button id="micBtn">🎙️</button>
   </div>
-
   <script>
     const chatBox = document.getElementById("chat");
-    const micBtn = document.getElementById("micBtn");
     let lastAudioUrl = null;
+    const recorder = new MicRecorder({ bitRate: 128 });
 
     function appendBubble(text, sender) {
       const div = document.createElement("div");
@@ -78,19 +60,15 @@
       const btn = document.createElement("button");
       btn.innerText = "🔊 Послушать ответ";
       btn.onclick = () => {
-        if (lastAudioUrl) {
-          const audio = new Audio(lastAudioUrl);
-          audio.play();
-        }
+        if (lastAudioUrl) new Audio(lastAudioUrl).play();
       };
       chatBox.appendChild(btn);
     }
 
-    async function sendMessage(text) {
+    async function sendMessage() {
       const input = document.getElementById("userInput");
-      if (!text) text = input.value.trim();
+      const text = input.value.trim();
       if (!text) return;
-
       appendBubble(text, "user");
       input.value = "";
 
@@ -98,17 +76,16 @@
         const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text })
         });
 
         const data = await res.json();
-        const reply = data.reply;
-        appendBubble(reply, "bot");
+        appendBubble(data.reply, "bot");
 
         const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: reply }),
+          body: JSON.stringify({ message: data.reply })
         });
 
         const audioBlob = await voiceRes.blob();
@@ -120,58 +97,42 @@
       }
     }
 
-    // 🎙️ Запись с микрофона и отправка на Whisper
-    micBtn.addEventListener("click", async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        const audioChunks = [];
+    document.getElementById("micBtn").onclick = () => {
+      recorder.start().then(() => {
+        document.getElementById("micBtn").innerText = "⏹️";
+        document.getElementById("micBtn").onclick = stopRecording;
+      });
+    };
 
-        micBtn.innerText = "⏹️"; // стоп
+    function stopRecording() {
+      recorder.stop().getMp3().then(([buffer, blob]) => {
+        const file = new File(buffer, "voice.mp3", { type: "audio/mp3" });
+        const formData = new FormData();
+        formData.append("audio", file);
 
-        mediaRecorder.ondataavailable = (e) => {
-          audioChunks.push(e.data);
-        };
-
-        mediaRecorder.onstop = async () => {
-          micBtn.innerText = "🎙️";
-          const blob = new Blob(audioChunks, { type: "audio/webm" });
-          const formData = new FormData();
-          formData.append("audio", blob, "recording.webm");
-
-          try {
-            const res = await fetch("https://nodejs-production-78841.up.railway.app/whisper", {
-              method: "POST",
-              body: formData,
-            });
-
-            const data = await res.json();
-            if (data.text) {
-              document.getElementById("userInput").value = data.text;
-              sendMessage(data.text);
-            } else {
-              appendBubble("Не удалось распознать речь", "bot");
-            }
-          } catch (err) {
-            appendBubble("Ошибка при расшифровке голоса", "bot");
+        fetch("https://nodejs-production-78841.up.railway.app/whisper", {
+          method: "POST",
+          body: formData
+        })
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById("userInput").value = data.text;
+            sendMessage();
+          })
+          .catch(err => {
+            appendBubble("Не удалось распознать речь", "bot");
             console.error(err);
-          }
-        };
+          });
+      });
 
-        mediaRecorder.start();
-
-        setTimeout(() => {
-          if (mediaRecorder.state !== "inactive") {
-            mediaRecorder.stop();
-            stream.getTracks().forEach(track => track.stop());
-          }
-        }, 5000); // макс 5 сек записи
-
-      } catch (err) {
-        alert("Ошибка при доступе к микрофону: " + err.message);
-        console.error(err);
-      }
-    });
+      document.getElementById("micBtn").innerText = "🎙️";
+      document.getElementById("micBtn").onclick = () => {
+        recorder.start().then(() => {
+          document.getElementById("micBtn").innerText = "⏹️";
+          document.getElementById("micBtn").onclick = stopRecording;
+        });
+      };
+    }
   </script>
 </body>
 </html>
