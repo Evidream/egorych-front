@@ -55,70 +55,60 @@
 <body>
   <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
   <div id="chat"></div>
-  <div id="inputArea">
-    <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
-    <button onclick="sendMessage()">➤</button>
-  </div>
+ <div id="inputArea">
+  <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
+  <button onclick="sendMessage()">➤</button>
+  <button id="micBtn">🎙️</button>
+</div>
 
   <script>
-  const chatBox = document.getElementById("chat");
-  let lastAudioUrl = null; // глобальная переменная
+  const micBtn = document.getElementById("micBtn");
 
-  function appendBubble(text, sender) {
-    const div = document.createElement("div");
-    div.className = `bubble ${sender}`;
-    div.innerText = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+  let mediaRecorder;
+  let audioChunks = [];
 
-  function appendAudioButton() {
-    const btn = document.createElement("button");
-    btn.innerText = "🔊 Послушать ответ";
-    btn.onclick = () => {
-      if (lastAudioUrl) {
-        const audio = new Audio(lastAudioUrl);
-        audio.play();
-      }
-    };
-    chatBox.appendChild(btn);
-  }
+  micBtn.onclick = async () => {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
+      audioChunks = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
 
-  async function sendMessage() {
-    const input = document.getElementById("userInput");
-    const text = input.value.trim();
-    if (!text) return;
+      micBtn.innerText = "⏹️"; // остановить
 
-    appendBubble(text, "user");
-    input.value = "";
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunks.push(e.data);
+      };
 
-    try {
-      const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
+        const formData = new FormData();
+        formData.append("audio", audioBlob, "recording.mp3");
 
-      const data = await res.json();
-      const reply = data.reply;
-      appendBubble(reply, "bot");
+        try {
+          const res = await fetch("https://nodejs-production-78841.up.railway.app/whisper", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.text) {
+            document.getElementById("userInput").value = data.text;
+          } else {
+            appendBubble("Не удалось распознать речь", "bot");
+          }
+        } catch (err) {
+          console.error("Ошибка при отправке аудио:", err);
+          appendBubble("Ошибка при отправке аудио", "bot");
+        }
 
-      // Озвучку сохраняем, но не воспроизводим
-      const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: reply }),
-      });
+        micBtn.innerText = "🎙️";
+      };
 
-      const audioBlob = await voiceRes.blob();
-      lastAudioUrl = URL.createObjectURL(audioBlob);
-      appendAudioButton();
-
-    } catch (err) {
-      appendBubble("Ошибка. Егорыч завис 🤯", "bot");
-      console.error(err);
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 5000); // записывает 5 секунд
     }
-  }
+  };
 </script>
 </body>
 </html>
