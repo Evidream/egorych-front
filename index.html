@@ -2,117 +2,123 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Егорыч — голосом и по-русски</title>
+  <title>Егорыч 🤖</title>
   <style>
     body {
       font-family: sans-serif;
+      padding: 30px;
+      background: #f7f7f7;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 15px;
+      background: white;
+      min-height: 300px;
       max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: #fff;
-      color: #000;
+      margin: auto;
+      overflow-y: auto;
     }
-    .chat {
-      margin-top: 1rem;
-    }
-    .chat div {
-      margin-bottom: 0.75rem;
+    .bubble {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      max-width: 80%;
     }
     .user {
-      font-weight: bold;
+      background: #dcf8c6;
+      align-self: flex-end;
+      text-align: right;
     }
-    .assistant {
-      margin-left: 1rem;
+    .bot {
+      background: #e3e3e3;
+      align-self: flex-start;
     }
-    textarea {
-      width: 100%;
-      height: 60px;
-      margin-top: 1rem;
+    #inputArea {
+      max-width: 600px;
+      margin: 20px auto;
+      display: flex;
+      gap: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
     }
     button {
-      margin-top: 0.5rem;
-      margin-right: 0.5rem;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>🎙️ Егорыч — голосом и по-русски</h1>
-
-  <textarea id="textInput" placeholder="Напиши Егорычу..."></textarea>
-  <br />
-  <button onclick="sendText()">Отправить</button>
-  <button onclick="startRecording()">🔴 Начать запись</button>
-  <button onclick="stopRecording()">⏹️ Остановить и отправить</button>
-
-  <div class="chat" id="chat"></div>
+  <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
+    <button onclick="sendMessage()">➤</button>
+  </div>
 
   <script>
-    const API_BASE = "https://egorych-backend-production.up.railway.app";
+  const chatBox = document.getElementById("chat");
+  let lastAudioUrl = null; // глобальная переменная
 
-    async function sendText() {
-      const input = document.getElementById("textInput").value;
-      if (!input) return;
+  function appendBubble(text, sender) {
+    const div = document.createElement("div");
+    div.className = `bubble ${sender}`;
+    div.innerText = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-      addMessage("user", input);
-      const res = await fetch(`${API_BASE}/chat`, {
+  function appendAudioButton() {
+    const btn = document.createElement("button");
+    btn.innerText = "🔊 Послушать ответ";
+    btn.onclick = () => {
+      if (lastAudioUrl) {
+        const audio = new Audio(lastAudioUrl);
+        audio.play();
+      }
+    };
+    chatBox.appendChild(btn);
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendBubble(text, "user");
+    input.value = "";
+
+    try {
+      const res = await fetch("https://nodejs-production-78841.up.railway.app/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: input })
+        body: JSON.stringify({ text }),
       });
 
       const data = await res.json();
-      addMessage("assistant", data.reply);
+      const reply = data.reply;
+      appendBubble(reply, "bot");
 
-      const speakRes = await fetch(`${API_BASE}/speak`, {
+      // Озвучку сохраняем, но не воспроизводим
+      const voiceRes = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: data.reply })
+        body: JSON.stringify({ message: reply }),
       });
 
-      const audioBlob = await speakRes.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play();
+      const audioBlob = await voiceRes.blob();
+      lastAudioUrl = URL.createObjectURL(audioBlob);
+      appendAudioButton();
+
+    } catch (err) {
+      appendBubble("Ошибка. Егорыч завис 🤯", "bot");
+      console.error(err);
     }
-
-    function addMessage(role, text) {
-      const div = document.createElement("div");
-      div.className = role;
-      div.innerText = `${role === "user" ? "Ты:" : "Егорыч:"} ${text}`;
-      document.getElementById("chat").appendChild(div);
-    }
-
-    let mediaRecorder;
-    let audioChunks = [];
-
-    function startRecording() {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      });
-    }
-
-    function stopRecording() {
-      if (!mediaRecorder) return;
-      mediaRecorder.stop();
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-        const formData = new FormData();
-        formData.append("audio", audioBlob, "voice.mp3");
-
-        const res = await fetch(`${API_BASE}/whisper`, {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await res.json();
-        document.getElementById("textInput").value = data.text;
-        sendText();
-      };
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
