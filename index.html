@@ -18,12 +18,15 @@
       max-width: 600px;
       margin: auto;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
     .bubble {
       margin: 10px 0;
       padding: 10px 15px;
       border-radius: 15px;
       max-width: 80%;
+      word-wrap: break-word;
     }
     .user {
       background: #dcf8c6;
@@ -39,8 +42,10 @@
       margin: 20px auto;
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    input {
+    input[type="text"] {
       flex: 1;
       padding: 10px;
       font-size: 16px;
@@ -50,19 +55,48 @@
       font-size: 16px;
       cursor: pointer;
     }
+    #fileInput {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
   <div id="chat"></div>
+
   <div id="inputArea">
+    <label for="fileInput" title="Прикрепить файл 📎">
+      <button>📎</button>
+    </label>
+    <input type="file" id="fileInput" accept="image/*" />
+
+    <button onclick="openCamera()">📷</button>
     <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
     <button onclick="sendMessage()">➤</button>
   </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
+    const supabase = supabase.createClient("https://zsgcxlujjorbvnmchuwx.supabase.co", "YOUR_PUBLIC_ANON_KEY");
+
     const chatBox = document.getElementById("chat");
+    const fileInput = document.getElementById("fileInput");
     let lastAudioUrl = null;
+    let attachedFile = null;
+    let userEmail = localStorage.getItem("userEmail") || null;
+
+    async function initUser() {
+      if (!userEmail) {
+        userEmail = prompt("Введи свой e-mail для входа в Егорыча:");
+        const password = prompt("И пароль:");
+        const { data, error } = await supabase.auth.signInWithPassword({ email: userEmail, password });
+        if (error) {
+          alert("Ошибка входа: " + error.message);
+          return;
+        }
+        localStorage.setItem("userEmail", userEmail);
+      }
+    }
 
     function appendBubble(text, sender) {
       const div = document.createElement("div");
@@ -84,19 +118,39 @@
       chatBox.appendChild(btn);
     }
 
+    function openCamera() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+      input.onchange = () => {
+        attachedFile = input.files[0];
+      };
+      input.click();
+    }
+
+    fileInput.addEventListener("change", (e) => {
+      attachedFile = e.target.files[0];
+    });
+
     async function sendMessage() {
       const input = document.getElementById("userInput");
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !attachedFile) return;
 
-      appendBubble(text, "user");
+      if (text) appendBubble(text, "user");
+      if (attachedFile) appendBubble("[Прикреплен файл: " + attachedFile.name + "]", "user");
+
       input.value = "";
+
+      const formData = new FormData();
+      formData.append("text", text);
+      if (attachedFile) formData.append("file", attachedFile);
 
       try {
         const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: formData,
         });
 
         const data = await res.json();
@@ -115,8 +169,12 @@
       } catch (err) {
         appendBubble("Ошибка. Егорыч завис 🤯", "bot");
         console.error(err);
+      } finally {
+        attachedFile = null;
       }
     }
+
+    initUser();
   </script>
 </body>
 </html>
