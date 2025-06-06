@@ -8,7 +8,7 @@
     body {
       font-family: sans-serif;
       padding: 20px;
-      background: #f2f2f2;
+      background: #f0f0f0;
     }
     #chat {
       max-height: 400px;
@@ -19,31 +19,46 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
-    .message {
-      margin: 5px 0;
-    }
+    .message { margin: 5px 0; }
     .user { font-weight: bold; }
     .bot { color: green; }
+
     #input-container {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      align-items: center;
     }
+
     input[type="text"] {
       flex: 1;
       padding: 10px;
       border-radius: 5px;
       border: 1px solid #aaa;
     }
+
     button, label {
-      padding: 10px 14px;
+      padding: 10px;
       border-radius: 5px;
       border: none;
       cursor: pointer;
       background: #4caf50;
       color: white;
+      font-size: 16px;
     }
-    #fileInput {
+
+    #fileInput, #cameraInput {
       display: none;
+    }
+
+    #preview {
+      margin-top: 10px;
+      max-height: 120px;
+    }
+
+    #preview img {
+      max-height: 100px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
@@ -55,14 +70,24 @@
 
   <div id="input-container">
     <input type="text" id="textInput" placeholder="Напиши что-нибудь..." />
-    <button onclick="sendMessage()">Отправить</button>
+    <button onclick="send()">Отправить</button>
     <button onclick="speakLast()">🔊</button>
+    <label for="cameraInput">📷</label>
     <label for="fileInput">📎</label>
-    <input type="file" id="fileInput" onchange="uploadFile()" />
+    <input type="file" id="fileInput" />
+    <input type="file" accept="image/*" capture="environment" id="cameraInput" />
   </div>
+
+  <div id="preview"></div>
 
   <script>
     const chatDiv = document.getElementById("chat");
+    const fileInput = document.getElementById("fileInput");
+    const cameraInput = document.getElementById("cameraInput");
+    const textInput = document.getElementById("textInput");
+    const previewDiv = document.getElementById("preview");
+
+    let selectedFile = null;
     let lastBotReply = "";
 
     function appendMessage(role, text) {
@@ -73,27 +98,79 @@
       chatDiv.scrollTop = chatDiv.scrollHeight;
     }
 
-    async function sendMessage() {
-      const input = document.getElementById("textInput");
-      const text = input.value.trim();
-      if (!text) return;
+    function showPreview(file) {
+      previewDiv.innerHTML = "";
+      if (!file || !file.type.startsWith("image/")) return;
 
-      appendMessage("user", text);
-      input.value = "";
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      previewDiv.appendChild(img);
+    }
 
-      try {
-        const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
-        const data = await res.json();
-        lastBotReply = data.reply;
-        appendMessage("bot", lastBotReply);
-      } catch (err) {
-        appendMessage("bot", "Ошибка 😞");
-        console.error(err);
+    fileInput.addEventListener("change", () => {
+      selectedFile = fileInput.files[0];
+      if (selectedFile) {
+        appendMessage("user", `📎 Готов к отправке: ${selectedFile.name}`);
+        showPreview(selectedFile);
       }
+    });
+
+    cameraInput.addEventListener("change", () => {
+      selectedFile = cameraInput.files[0];
+      if (selectedFile) {
+        appendMessage("user", `📷 Фото с камеры готово к отправке: ${selectedFile.name}`);
+        showPreview(selectedFile);
+      }
+    });
+
+    async function send() {
+      const text = textInput.value.trim();
+
+      if (!text && !selectedFile) return;
+
+      if (text) {
+        appendMessage("user", text);
+        try {
+          const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          const data = await res.json();
+          lastBotReply = data.reply;
+          appendMessage("bot", lastBotReply);
+        } catch (err) {
+          appendMessage("bot", "Ошибка 😞");
+        }
+      }
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        appendMessage("user", `📤 Отправка файла: ${selectedFile.name}`);
+
+        try {
+          const res = await fetch("https:egorych-backend-production.up.railway.app/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.filename) {
+            appendMessage("bot", `✅ Файл загружен: ${data.filename}`);
+          } else {
+            appendMessage("bot", "❌ Ошибка загрузки файла");
+          }
+        } catch (err) {
+          appendMessage("bot", "❌ Ошибка при загрузке файла");
+        }
+      }
+
+      // Сброс
+      textInput.value = "";
+      fileInput.value = "";
+      cameraInput.value = "";
+      previewDiv.innerHTML = "";
+      selectedFile = null;
     }
 
     async function speakLast() {
@@ -112,35 +189,6 @@
       } catch (err) {
         console.error("Ошибка при воспроизведении звука:", err);
       }
-    }
-
-    async function uploadFile() {
-      const fileInput = document.getElementById("fileInput");
-      const file = fileInput.files[0];
-      if (!file) return;
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      appendMessage("user", `📎 Отправлен файл: ${file.name}`);
-
-      try {
-        const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (data.filename) {
-          appendMessage("bot", `Файл успешно загружен: ${data.filename}`);
-        } else {
-          appendMessage("bot", "Ошибка при загрузке файла 🥴");
-        }
-      } catch (err) {
-        appendMessage("bot", "Ошибка при загрузке файла 😵");
-        console.error(err);
-      }
-
-      fileInput.value = "";
     }
   </script>
 
