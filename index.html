@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Егорыч 🤖</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -19,6 +18,8 @@
       max-width: 600px;
       margin: auto;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
     .bubble {
       margin: 10px 0;
@@ -40,6 +41,7 @@
       margin: 20px auto;
       display: flex;
       gap: 10px;
+      align-items: center;
     }
     input[type="text"] {
       flex: 1;
@@ -55,48 +57,19 @@
 </head>
 <body>
   <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
+
   <div id="chat"></div>
 
   <div id="inputArea">
-    <input type="file" id="fileInput" accept="image/*" style="display:none" />
     <button onclick="document.getElementById('fileInput').click()">📎</button>
-    <button onclick="openCamera()">📷</button>
     <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
     <button onclick="sendMessage()">➤</button>
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileUpload(event)" />
   </div>
 
   <script>
-    const supabase = supabase.createClient("https://zsgcxlujjorbvnmchuwx.supabase.co", "YOUR_PUBLIC_ANON_KEY");
-
-    let currentUser = null;
-
-    async function initAuth() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: "demo@egorych.ai",
-          password: "demo1234"
-        });
-        currentUser = data.user;
-      } else {
-        currentUser = session.user;
-      }
-    }
-
-    initAuth();
-
     const chatBox = document.getElementById("chat");
-    const fileInput = document.getElementById("fileInput");
     let lastAudioUrl = null;
-    let attachedFile = null;
-
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (file) {
-        attachedFile = file;
-        appendBubble(`[Файл прикреплён: ${file.name}]`, "user");
-      }
-    });
 
     function appendBubble(text, sender) {
       const div = document.createElement("div");
@@ -121,26 +94,21 @@
     async function sendMessage() {
       const input = document.getElementById("userInput");
       const text = input.value.trim();
-      if (!text && !attachedFile) return;
+      if (!text) return;
 
-      if (text) appendBubble(text, "user");
+      appendBubble(text, "user");
       input.value = "";
-
-      const formData = new FormData();
-      formData.append("text", text);
-      if (attachedFile) {
-        formData.append("file", attachedFile);
-      }
 
       try {
         const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
         });
 
         const data = await res.json();
         const reply = data.reply;
-        appendBubble(reply || "(нет ответа)", "bot");
+        appendBubble(reply, "bot");
 
         const voiceRes = await fetch("https://egorych-backend-production.up.railway.app/speak", {
           method: "POST",
@@ -152,27 +120,36 @@
         lastAudioUrl = URL.createObjectURL(audioBlob);
         appendAudioButton();
 
-        attachedFile = null;
       } catch (err) {
         appendBubble("Ошибка. Егорыч завис 🤯", "bot");
         console.error(err);
       }
     }
 
-    async function openCamera() {
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      appendBubble(`[Файл прикреплён: ${file.name}]`, "user");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const track = stream.getVideoTracks()[0];
-        const imageCapture = new ImageCapture(track);
-        const blob = await imageCapture.takePhoto();
+        const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-        attachedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
-        appendBubble("[Фото сделано и прикреплено]", "user");
+        if (!res.ok) throw new Error("Ошибка загрузки файла");
 
-        track.stop();
+        const data = await res.json();
+        const reply = data.reply || "Файл принят";
+        appendBubble(reply, "bot");
+
       } catch (err) {
-        console.error("Ошибка доступа к камере:", err);
-        alert("Не удалось получить доступ к камере");
+        appendBubble("Ошибка при отправке файла 🤯", "bot");
+        console.error(err);
       }
     }
   </script>
