@@ -2,101 +2,83 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Егорыч 🤖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Егорыч</title>
   <style>
     body {
       font-family: sans-serif;
-      padding: 30px;
-      background: #f7f7f7;
+      padding: 20px;
+      background: #f2f2f2;
     }
     #chat {
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 15px;
-      background: white;
-      min-height: 300px;
-      max-width: 600px;
-      margin: auto;
+      max-height: 400px;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
-    .bubble {
-      margin: 10px 0;
-      padding: 10px 15px;
-      border-radius: 15px;
-      max-width: 80%;
+    .message {
+      margin: 5px 0;
     }
-    .user {
-      background: #dcf8c6;
-      align-self: flex-end;
-      text-align: right;
-    }
-    .bot {
-      background: #e3e3e3;
-      align-self: flex-start;
-    }
-    #inputArea {
-      max-width: 600px;
-      margin: 20px auto;
+    .user { font-weight: bold; }
+    .bot { color: green; }
+    #input-container {
       display: flex;
       gap: 10px;
-      align-items: center;
     }
     input[type="text"] {
       flex: 1;
       padding: 10px;
-      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
+    button, label {
+      padding: 10px 14px;
+      border-radius: 5px;
+      border: none;
       cursor: pointer;
+      background: #4caf50;
+      color: white;
+    }
+    #fileInput {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h2 style="text-align: center;">Егорыч 🤖 — спроси, что хочешь</h2>
+
+  <h2>Егорыч 👨‍🔧</h2>
 
   <div id="chat"></div>
 
-  <div id="inputArea">
-    <button onclick="document.getElementById('fileInput').click()">📎</button>
-    <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
-    <button onclick="sendMessage()">➤</button>
-    <input type="file" id="fileInput" style="display: none;" onchange="handleFileUpload(event)" />
+  <div id="input-container">
+    <input type="text" id="textInput" placeholder="Напиши что-нибудь..." />
+    <button onclick="sendMessage()">Отправить</button>
+    <button onclick="speakLast()">🔊</button>
+    <label for="fileInput">📎</label>
+    <input type="file" id="fileInput" onchange="uploadFile()" />
   </div>
 
   <script>
-    const chatBox = document.getElementById("chat");
-    let lastAudioUrl = null;
+    const chatDiv = document.getElementById("chat");
+    let lastBotReply = "";
 
-    function appendBubble(text, sender) {
-      const div = document.createElement("div");
-      div.className = `bubble ${sender}`;
-      div.innerText = text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function appendAudioButton() {
-      const btn = document.createElement("button");
-      btn.innerText = "🔊 Послушать ответ";
-      btn.onclick = () => {
-        if (lastAudioUrl) {
-          const audio = new Audio(lastAudioUrl);
-          audio.play();
-        }
-      };
-      chatBox.appendChild(btn);
+    function appendMessage(role, text) {
+      const message = document.createElement("div");
+      message.className = "message " + role;
+      message.innerHTML = `<span class="${role}">${role === "user" ? "Ты" : "Егорыч"}:</span> ${text}`;
+      chatDiv.appendChild(message);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
     }
 
     async function sendMessage() {
-      const input = document.getElementById("userInput");
+      const input = document.getElementById("textInput");
       const text = input.value.trim();
       if (!text) return;
 
-      appendBubble(text, "user");
+      appendMessage("user", text);
       input.value = "";
 
       try {
@@ -105,53 +87,62 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text }),
         });
-
         const data = await res.json();
-        const reply = data.reply;
-        appendBubble(reply, "bot");
-
-        const voiceRes = await fetch("https://egorych-backend-production.up.railway.app/speak", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: reply }),
-        });
-
-        const audioBlob = await voiceRes.blob();
-        lastAudioUrl = URL.createObjectURL(audioBlob);
-        appendAudioButton();
-
+        lastBotReply = data.reply;
+        appendMessage("bot", lastBotReply);
       } catch (err) {
-        appendBubble("Ошибка. Егорыч завис 🤯", "bot");
+        appendMessage("bot", "Ошибка 😞");
         console.error(err);
       }
     }
 
-    async function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async function speakLast() {
+      if (!lastBotReply) return;
+      try {
+        const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: lastBotReply }),
+        });
+        const audioData = await res.arrayBuffer();
+        const blob = new Blob([audioData], { type: "audio/mpeg" });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+      } catch (err) {
+        console.error("Ошибка при воспроизведении звука:", err);
+      }
+    }
 
-      appendBubble(`[Файл прикреплён: ${file.name}]`, "user");
+    async function uploadFile() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      if (!file) return;
 
       const formData = new FormData();
       formData.append("file", file);
+
+      appendMessage("user", `📎 Отправлен файл: ${file.name}`);
 
       try {
         const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
           method: "POST",
           body: formData,
         });
-
-        if (!res.ok) throw new Error("Ошибка загрузки файла");
-
         const data = await res.json();
-        const reply = data.reply || "Файл принят";
-        appendBubble(reply, "bot");
-
+        if (data.filename) {
+          appendMessage("bot", `Файл успешно загружен: ${data.filename}`);
+        } else {
+          appendMessage("bot", "Ошибка при загрузке файла 🥴");
+        }
       } catch (err) {
-        appendBubble("Ошибка при отправке файла 🤯", "bot");
+        appendMessage("bot", "Ошибка при загрузке файла 😵");
         console.error(err);
       }
+
+      fileInput.value = "";
     }
   </script>
+
 </body>
 </html>
