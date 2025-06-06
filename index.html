@@ -202,6 +202,32 @@
             const data = await res.json();
             if (data.filename) {
               appendMessage("bot", `✅ Файл загружен: ${data.filename}`);
+
+              // 👁️ Vision-анализ
+              if (selectedFile && selectedFile.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = async function () {
+                  const base64 = reader.result.split(',')[1];
+                  try {
+                    const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ base64 }),
+                    });
+                    const visionData = await visionRes.json();
+                    if (visionData.reply) {
+                      appendMessage("bot", visionData.reply);
+                    } else {
+                      appendMessage("bot", "🤖 Егорыч посмотрел, но ничего не понял.");
+                    }
+                  } catch (err) {
+                    appendMessage("bot", "❌ Егорыч не смог посмотреть фото.");
+                    console.error("Vision error:", err);
+                  }
+                };
+                reader.readAsDataURL(selectedFile);
+              }
+
             } else {
               appendMessage("bot", "❌ Ошибка загрузки файла");
             }
