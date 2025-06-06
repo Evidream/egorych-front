@@ -3,72 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Егорыч — голосовой ассистент</title>
+  <title>Егорыч — голосом и по-русски</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff;
+      padding: 30px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: bold;
+    }
+    #chat {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      height: 300px;
+      overflow-y: auto;
+    }
+    .bubble {
+      margin-bottom: 10px;
+    }
+    .user {
+      text-align: right;
+      color: blue;
+    }
+    .assistant {
+      text-align: left;
+      color: green;
+    }
+    input[type="text"] {
+      width: 60%;
+      padding: 8px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-left: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h1>🎙 Егорыч — голосом и по-русски</h1>
-  
-  <button id="start-recording">🔴 Начать запись</button>
-  <button id="stop-recording">⏹ Остановить и отправить</button>
-  <div id="response"></div>
-
-  <script type="module">
-    import MicRecorder from 'https://cdn.skypack.dev/mic-recorder-to-mp3';
-
-    const recorder = new MicRecorder({ bitRate: 128 });
-    let isRecording = false;
-
-    const startBtn = document.getElementById("start-recording");
-    const stopBtn = document.getElementById("stop-recording");
-    const responseDiv = document.getElementById("response");
-
-    startBtn.onclick = () => {
-      recorder.start()
-        .then(() => { isRecording = true; console.log("🎤 Recording..."); })
-        .catch((e) => console.error("Ошибка старта записи:", e));
-    };
-
-    stopBtn.onclick = () => {
-      if (!isRecording) return;
-      recorder.stop().getMp3()
-        .then(([buffer, blob]) => {
-          const file = new File(buffer, "audio.mp3", { type: "audio/mpeg" });
-          const formData = new FormData();
-          formData.append("audio", file);
-
-          fetch("https://egorych-backend-production.up.railway.app/whisper", {
-            method: "POST",
-            body: formData,
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              const text = data.text;
-              responseDiv.innerText = `📝 Расшифровка: ${text}`;
-              return fetch("https://egorych-backend-production.up.railway.app/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
-              });
-            })
-            .then((res) => res.json())
-            .then((chatData) => {
-              const reply = chatData.reply;
-              responseDiv.innerText += `\n🤖 Егорыч: ${reply}`;
-              return fetch("https://egorych-backend-production.up.railway.app/speak", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: reply }),
-              });
-            })
-            .then((res) => res.blob())
-            .then((audioBlob) => {
-              const url = URL.createObjectURL(audioBlob);
-              const audio = new Audio(url);
-              audio.play();
-            })
-            .catch((err) => console.error("Ошибка обработки:", err));
-        });
-    };
-  </script>
-</body>
-</html>
+  <h1>
