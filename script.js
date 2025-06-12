@@ -1,16 +1,16 @@
 const chat = document.getElementById("chat");
 const input = document.getElementById("textInput");
 const fileInput = document.getElementById("fileInput");
-const preview = document.getElementById("preview");
 const cameraPreview = document.getElementById("cameraPreview");
 const video = document.getElementById("video");
 
 let selectedFile = null;
+let lastBotReply = "";
 let mediaStream = null;
 
 function appendMessage(text, sender) {
   const bubble = document.createElement("div");
-  bubble.className = `bubble ${sender}`;
+  bubble.className = `message ${sender}`;
   bubble.textContent = text;
   chat.appendChild(bubble);
   chat.scrollTop = chat.scrollHeight;
@@ -20,18 +20,8 @@ fileInput.addEventListener("change", () => {
   selectedFile = fileInput.files[0];
   if (selectedFile) {
     appendMessage(`📎 Готов к отправке: ${selectedFile.name}`, "user");
-    showPreview(selectedFile);
   }
 });
-
-function showPreview(file) {
-  if (!preview) return;
-  preview.innerHTML = "";
-  if (!file || !file.type.startsWith("image/")) return;
-  const img = document.createElement("img");
-  img.src = URL.createObjectURL(file);
-  preview.appendChild(img);
-}
 
 function openCamera() {
   navigator.mediaDevices.getUserMedia({ video: true })
@@ -64,85 +54,80 @@ function takePhoto() {
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
     appendMessage("📸 Сделан снимок", "user");
-    showPreview(selectedFile);
     closeCamera();
   }, "image/jpeg", 0.95);
 }
 
-async function send() {
-  const message = input.value.trim();
-  if (!message && !selectedFile) return;
+async function sendText() {
+  const text = input.value.trim();
+  if (!text) return;
 
-  if (message) {
-    appendMessage(message, "user");
-    input.value = "";
+  appendMessage(text, "user");
+  input.value = "";
 
-    try {
-      const response = await fetch("https://www.chatbase.co/api/v1/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ТВОЙ_CHATBASE_API_KEY"
-        },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: message }],
-          chatbotId: "5JFv8PIdG3zeZb0RvFsTr"
-        })
-      });
+  try {
+    const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
 
-      const data = await response.json();
-      const reply = data.messages?.[0]?.content || "Егорыч молчит...";
-      appendMessage(reply, "bot");
-    } catch (err) {
-      appendMessage("❌ Ошибка ответа от Егорыча", "bot");
-      console.error("Chat error:", err);
-    }
-  }
-
-  if (selectedFile) {
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
-
-    try {
-      const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      if (data.filename) {
-        appendMessage(`✅ Файл загружен: ${data.filename}`, "bot");
-      } else {
-        appendMessage("❌ Ошибка загрузки файла", "bot");
-      }
-    } catch (err) {
-      appendMessage("❌ Ошибка при загрузке файла", "bot");
-      console.error("Upload error:", err);
-    }
-
-    selectedFile = null;
-    fileInput.value = "";
-    if (preview) preview.innerHTML = "";
+    const data = await res.json();
+    lastBotReply = data.reply || "🤖 Егорыч молчит...";
+    appendMessage(lastBotReply, "bot");
+  } catch (err) {
+    console.error("Ошибка чата:", err);
+    appendMessage("❌ Ошибка ответа от Егорыча", "bot");
   }
 }
 
-async function speakLast() {
-  const botMessages = document.querySelectorAll(".bot");
-  if (!botMessages.length) return;
-  const lastMessage = botMessages[botMessages.length - 1].textContent;
+async function sendFile() {
+  if (!selectedFile) return;
+
+  const formData = new FormData();
+  formData.append("file", selectedFile);
+  appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
 
   try {
-    const response = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
+    const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: lastMessage })
+      body: formData
     });
 
-    const blob = await response.blob();
-    const audioURL = URL.createObjectURL(blob);
-    const audio = new Audio(audioURL);
+    const data = await res.json();
+    if (data.filename) {
+      appendMessage(`✅ Файл загружен: ${data.filename}`, "bot");
+    } else {
+      appendMessage("❌ Ошибка загрузки файла", "bot");
+    }
+  } catch (err) {
+    console.error("Ошибка загрузки:", err);
+    appendMessage("❌ Ошибка при загрузке", "bot");
+  }
+
+  selectedFile = null;
+  fileInput.value = "";
+}
+
+async function send() {
+  await sendText();
+  if (selectedFile) await sendFile();
+}
+
+async function speakLast() {
+  if (!lastBotReply) return;
+
+  try {
+    const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: lastBotReply })
+    });
+
+    const audioData = await res.arrayBuffer();
+    const blob = new Blob([audioData], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
     audio.play();
   } catch (err) {
     console.error("Ошибка озвучки:", err);
