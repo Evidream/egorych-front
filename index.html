@@ -8,7 +8,7 @@
   <!-- preload шрифта -->
   <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
 
-  <!-- подключаем внешний CSS -->
+  <!-- подключение CSS -->
   <link rel="stylesheet" href="style.css" />
 
   <style>
@@ -24,10 +24,9 @@
 
   <div id="chat"></div>
 
-  <!-- Превью камеры -->
-  <div id="cameraPreview">
-    <video id="video" autoplay playsinline style="width: 100%; height: auto; border-radius: 8px;"></video><br />
-    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+  <div id="cameraPreview" class="camera-box">
+    <video id="video" autoplay playsinline></video>
+    <div class="camera-controls">
       <button class="icon-button" onclick="takePhoto()">
         <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок" />
       </button>
@@ -37,7 +36,6 @@
     </div>
   </div>
 
-  <!-- Нижнее поле ввода -->
   <div id="input-container">
     <input type="text" id="textInput" placeholder="Что на душе?" />
     <label for="fileInput" class="icon-button">
@@ -52,7 +50,6 @@
     </div>
   </div>
 
-  <!-- внешний JavaScript -->
   <script src="script.js"></script>
 
 </body>
