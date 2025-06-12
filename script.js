@@ -1,5 +1,5 @@
 const chat = document.getElementById("chat");
-const input = document.getElementById("userInput");
+const input = document.getElementById("textInput");
 const fileInput = document.getElementById("fileInput");
 const preview = document.getElementById("preview");
 const cameraPreview = document.getElementById("cameraPreview");
@@ -25,6 +25,7 @@ fileInput.addEventListener("change", () => {
 });
 
 function showPreview(file) {
+  if (!preview) return;
   preview.innerHTML = "";
   if (!file || !file.type.startsWith("image/")) return;
   const img = document.createElement("img");
@@ -68,7 +69,7 @@ function takePhoto() {
   }, "image/jpeg", 0.95);
 }
 
-async function sendMessage() {
+async function send() {
   const message = input.value.trim();
   if (!message && !selectedFile) return;
 
@@ -76,21 +77,26 @@ async function sendMessage() {
     appendMessage(message, "user");
     input.value = "";
 
-    const response = await fetch("https://www.chatbase.co/api/v1/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer ТВОЙ_CHATBASE_API_KEY"
-      },
-      body: JSON.stringify({
-        messages: [{ role: "user", content: message }],
-        chatbotId: "5JFv8PIdG3zeZb0RvFsTr"
-      })
-    });
+    try {
+      const response = await fetch("https://www.chatbase.co/api/v1/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ТВОЙ_CHATBASE_API_KEY"
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: message }],
+          chatbotId: "5JFv8PIdG3zeZb0RvFsTr"
+        })
+      });
 
-    const data = await response.json();
-    const reply = data.messages?.[0]?.content || "Егорыч молчит...";
-    appendMessage(reply, "bot");
+      const data = await response.json();
+      const reply = data.messages?.[0]?.content || "Егорыч молчит...";
+      appendMessage(reply, "bot");
+    } catch (err) {
+      appendMessage("❌ Ошибка ответа от Егорыча", "bot");
+      console.error("Chat error:", err);
+    }
   }
 
   if (selectedFile) {
@@ -112,14 +118,13 @@ async function sendMessage() {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
     } catch (err) {
-      appendMessage("❌ Ошибка при загрузке", "bot");
+      appendMessage("❌ Ошибка при загрузке файла", "bot");
       console.error("Upload error:", err);
     }
 
-    // Сброс
     selectedFile = null;
     fileInput.value = "";
-    preview.innerHTML = "";
+    if (preview) preview.innerHTML = "";
   }
 }
 
@@ -128,14 +133,18 @@ async function speakLast() {
   if (!botMessages.length) return;
   const lastMessage = botMessages[botMessages.length - 1].textContent;
 
-  const response = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: lastMessage })
-  });
+  try {
+    const response = await fetch("https://nodejs-production-78841.up.railway.app/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: lastMessage })
+    });
 
-  const blob = await response.blob();
-  const audioURL = URL.createObjectURL(blob);
-  const audio = new Audio(audioURL);
-  audio.play();
+    const blob = await response.blob();
+    const audioURL = URL.createObjectURL(blob);
+    const audio = new Audio(audioURL);
+    audio.play();
+  } catch (err) {
+    console.error("Ошибка озвучки:", err);
+  }
 }
