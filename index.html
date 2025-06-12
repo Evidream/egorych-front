@@ -8,10 +8,9 @@
   <!-- preload шрифта -->
   <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
 
-  <!-- внешний CSS -->
+  <!-- подключаем внешний CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- подключение шрифта Pragmatica -->
   <style>
     @font-face {
       font-family: 'Pragmatica';
@@ -25,29 +24,31 @@
 
   <div id="chat"></div>
 
+  <!-- Превью камеры -->
   <div id="cameraPreview">
     <video id="video" autoplay playsinline style="width: 100%; height: auto; border-radius: 8px;"></video><br />
     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
       <button class="icon-button" onclick="takePhoto()">
-        <img src="assets/attachment-preview-button-photo.jpeg" alt="Сделать снимок" />
+        <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок" />
       </button>
       <button class="icon-button" onclick="closeCamera()">
-        <img src="assets/attachment-preview-button-close.jpeg" alt="Закрыть камеру" />
+        <img src="assets/attachment-preview-button-close.svg" alt="Закрыть камеру" />
       </button>
     </div>
   </div>
 
+  <!-- Нижнее поле ввода -->
   <div id="input-container">
     <input type="text" id="textInput" placeholder="Что на душе?" />
     <label for="fileInput" class="icon-button">
-      <img src="assets/ant-design_paper-clip-outlined.jpeg" alt="Прикрепить" />
+      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Прикрепить" />
     </label>
     <input type="file" id="fileInput" />
     <button class="icon-button" onclick="openCamera()">
-      <img src="assets/fluent_camera.jpeg" alt="Камера" />
+      <img src="assets/fluent_camera.svg" alt="Камера" />
     </button>
     <div id="sendBtn" onclick="send()">
-      <img src="assets/send-button.jpeg" alt="Отправить" />
+      <img src="assets/send-button.svg" alt="Отправить" />
     </div>
   </div>
 
