@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Егорыч</title>
+
+  <!-- preload шрифта -->
   <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
+
+  <!-- подключаем внешний CSS -->
+  <link rel="stylesheet" href="style.css" />
+
   <style>
     @font-face {
       font-family: 'Pragmatica';
@@ -146,78 +152,8 @@
     </div>
   </div>
 
-  <script>
-    const chatDiv = document.getElementById("chat");
-    const fileInput = document.getElementById("fileInput");
-    const textInput = document.getElementById("textInput");
-    const cameraPreview = document.getElementById("cameraPreview");
-    const video = document.getElementById("video");
-
-    let selectedFile = null;
-    let lastBotReply = "";
-    let mediaStream = null;
-
-    function appendMessage(role, text) {
-      const message = document.createElement("div");
-      message.className = "message " + role;
-      message.textContent = text;
-      chatDiv.appendChild(message);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    }
-
-    function openCamera() {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          mediaStream = stream;
-          video.srcObject = stream;
-          cameraPreview.style.display = "block";
-        })
-        .catch(err => {
-          appendMessage("bot", "🚫 Нет доступа к камере");
-        });
-    }
-
-    function closeCamera() {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        mediaStream = null;
-      }
-      cameraPreview.style.display = "none";
-    }
-
-    function takePhoto() {
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0);
-
-      canvas.toBlob(blob => {
-        selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-        appendMessage("user", `📸 Сделан снимок`);
-        closeCamera();
-      }, "image/jpeg", 0.95);
-    }
-
-    async function send() {
-      const text = textInput.value.trim();
-      if (!text) return;
-      appendMessage("user", text);
-      try {
-        const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
-        const data = await res.json();
-        lastBotReply = data.reply;
-        appendMessage("bot", lastBotReply);
-      } catch (err) {
-        appendMessage("bot", "❌ Ошибка при ответе");
-      }
-      textInput.value = "";
-    }
-  </script>
+  <!-- внешний JavaScript -->
+  <script src="script.js"></script>
 
 </body>
 </html>
