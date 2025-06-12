@@ -2,15 +2,16 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Егорыч</title>
 
   <!-- preload шрифта -->
   <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
 
-  <!-- подключение CSS -->
+  <!-- внешний CSS -->
   <link rel="stylesheet" href="style.css" />
 
+  <!-- подключение шрифта -->
   <style>
     @font-face {
       font-family: 'Pragmatica';
@@ -21,12 +22,11 @@
   </style>
 </head>
 <body>
-
   <div id="chat"></div>
 
-  <div id="cameraPreview" class="camera-box">
+  <div id="cameraPreview">
     <video id="video" autoplay playsinline></video>
-    <div class="camera-controls">
+    <div class="camera-buttons">
       <button class="icon-button" onclick="takePhoto()">
         <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок" />
       </button>
@@ -51,6 +51,5 @@
   </div>
 
   <script src="script.js"></script>
-
 </body>
 </html>
