@@ -4,98 +4,152 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Егорыч</title>
+  <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
   <style>
+    @font-face {
+      font-family: 'Pragmatica';
+      src: url('pragmatica_medium_1.ttf') format('truetype');
+      font-weight: 500;
+      font-style: normal;
+    }
+
     body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f0f0f0;
+      font-family: 'Pragmatica', sans-serif;
+      background-color: #5c4db1;
+      margin: 0;
+      padding: 0;
     }
+
     #chat {
-      max-height: 400px;
+      max-height: 70vh;
       overflow-y: auto;
-      background: white;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 20px;
     }
-    .message { margin: 5px 0; }
-    .user { font-weight: bold; }
-    .bot { color: green; }
+
+    .message {
+      display: flex;
+      align-items: flex-end;
+      margin-bottom: 16px;
+      max-width: 70%;
+    }
+
+    .bot {
+      background-color: #fff;
+      color: #303030;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.4px;
+      align-self: flex-start;
+    }
+
+    .user {
+      background-color: #000;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.4px;
+      align-self: flex-end;
+      margin-left: auto;
+    }
 
     #input-container {
       display: flex;
-      gap: 8px;
       align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-radius: 300px;
+      padding: 10px 20px;
+      margin: 0 20px 20px;
+      box-sizing: border-box;
     }
 
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #aaa;
-    }
-
-    button, label {
-      padding: 10px;
-      border-radius: 5px;
+    #textInput {
       border: none;
-      cursor: pointer;
-      background: #4caf50;
-      color: white;
+      flex: 1;
       font-size: 16px;
+      padding: 10px;
+      font-family: 'Pragmatica', sans-serif;
+    }
+
+    #textInput:focus {
+      outline: none;
     }
 
     #fileInput {
       display: none;
     }
 
-    #preview img {
-      max-height: 100px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin-top: 10px;
+    .icon-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .icon-button img {
+      width: 28px;
+      height: 28px;
+    }
+
+    #sendBtn {
+      width: 75px;
+      height: 75px;
+      border-radius: 3000px;
+      background: #8704B5;
+      border: 8px solid #9221BA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    #sendBtn img {
+      width: 30px;
+      height: 30px;
     }
 
     #cameraPreview {
       display: none;
-      margin-top: 10px;
-    }
-
-    #cameraPreview video {
-      max-width: 100%;
-      border-radius: 8px;
-      border: 1px solid #aaa;
+      background: #000;
+      border: 7px solid rgba(255, 255, 255, 0.3);
+      border-radius: 34px;
+      padding: 10px;
+      width: 324px;
+      height: 576px;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
 
-  <h2>Егорыч 👨‍🔧</h2>
-
   <div id="chat"></div>
 
-  <div id="input-container">
-    <input type="text" id="textInput" placeholder="Напиши что-нибудь..." />
-    <button onclick="send()">Отправить</button>
-    <button onclick="speakLast()">🔊</button>
-    <label for="fileInput">📎</label>
-    <button onclick="openCamera()">📷</button>
-    <input type="file" id="fileInput" />
+  <div id="cameraPreview">
+    <video id="video" autoplay playsinline style="width: 100%; height: auto; border-radius: 8px;"></video><br />
+    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+      <button class="icon-button" onclick="takePhoto()"><img src="attachment-preview-button-photo.jpeg" alt="Сделать снимок" /></button>
+      <button class="icon-button" onclick="closeCamera()"><img src="attachment-preview-button-close.jpeg" alt="Закрыть камеру" /></button>
+    </div>
   </div>
 
-  <div id="preview"></div>
-  <div id="cameraPreview">
-    <video id="video" autoplay playsinline></video><br />
-    <button onclick="takePhoto()">📸 Сделать снимок</button>
-    <button onclick="closeCamera()">❌ Закрыть камеру</button>
+  <div id="input-container">
+    <input type="text" id="textInput" placeholder="Что на душе?" />
+    <label for="fileInput" class="icon-button"><img src="ant-design_paper-clip-outlined.jpeg" alt="Прикрепить" /></label>
+    <input type="file" id="fileInput" />
+    <button class="icon-button" onclick="openCamera()"><img src="fluent_camera.jpeg" alt="Камера" /></button>
+    <div id="sendBtn" onclick="send()">
+      <img src="send-button.jpeg" alt="Отправить" />
+    </div>
   </div>
 
   <script>
     const chatDiv = document.getElementById("chat");
     const fileInput = document.getElementById("fileInput");
     const textInput = document.getElementById("textInput");
-    const previewDiv = document.getElementById("preview");
     const cameraPreview = document.getElementById("cameraPreview");
     const video = document.getElementById("video");
 
@@ -106,27 +160,10 @@
     function appendMessage(role, text) {
       const message = document.createElement("div");
       message.className = "message " + role;
-      message.innerHTML = `<span class="${role}">${role === "user" ? "Ты" : "Егорыч"}:</span> ${text}`;
+      message.textContent = text;
       chatDiv.appendChild(message);
       chatDiv.scrollTop = chatDiv.scrollHeight;
     }
-
-    function showPreview(file) {
-      previewDiv.innerHTML = "";
-      if (!file || !file.type.startsWith("image/")) return;
-
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      previewDiv.appendChild(img);
-    }
-
-    fileInput.addEventListener("change", () => {
-      selectedFile = fileInput.files[0];
-      if (selectedFile) {
-        appendMessage("user", `📎 Готов к отправке: ${selectedFile.name}`);
-        showPreview(selectedFile);
-      }
-    });
 
     function openCamera() {
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -137,7 +174,6 @@
         })
         .catch(err => {
           appendMessage("bot", "🚫 Нет доступа к камере");
-          console.error("Ошибка доступа к камере:", err);
         });
     }
 
@@ -159,107 +195,27 @@
       canvas.toBlob(blob => {
         selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
         appendMessage("user", `📸 Сделан снимок`);
-        showPreview(selectedFile);
         closeCamera();
       }, "image/jpeg", 0.95);
     }
 
     async function send() {
       const text = textInput.value.trim();
-
-      if (!text && !selectedFile) return;
-
-      if (text) {
-        appendMessage("user", text);
-        try {
-          const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }),
-          });
-          const data = await res.json();
-          lastBotReply = data.reply;
-          appendMessage("bot", lastBotReply);
-        } catch (err) {
-          appendMessage("bot", "❌ Ошибка при ответе");
-        }
-      }
-
-      if (selectedFile) {
-        if (!selectedFile.name || selectedFile.size === 0) {
-          appendMessage("bot", "⚠️ Невалидный файл, отправка отменена");
-        } else {
-          const formData = new FormData();
-          formData.append("file", selectedFile);
-
-          appendMessage("user", `📤 Отправка файла: ${selectedFile.name}`);
-
-          try {
-            const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
-              method: "POST",
-              body: formData,
-            });
-            const data = await res.json();
-            if (data.filename) {
-              appendMessage("bot", `✅ Файл загружен: ${data.filename}`);
-
-              // 👁️ Vision-анализ
-              if (selectedFile && selectedFile.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = async function () {
-                  const base64 = reader.result.split(',')[1];
-                  try {
-                    const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ base64 }),
-                    });
-                    const visionData = await visionRes.json();
-                    if (visionData.reply) {
-                      appendMessage("bot", visionData.reply);
-                    } else {
-                      appendMessage("bot", "🤖 Егорыч посмотрел, но ничего не понял.");
-                    }
-                  } catch (err) {
-                    appendMessage("bot", "❌ Егорыч не смог посмотреть фото.");
-                    console.error("Vision error:", err);
-                  }
-                };
-                reader.readAsDataURL(selectedFile);
-              }
-
-            } else {
-              appendMessage("bot", "❌ Ошибка загрузки файла");
-            }
-          } catch (err) {
-            appendMessage("bot", "❌ Ошибка при загрузке файла");
-          }
-        }
-      }
-
-      // Очистка
-      textInput.value = "";
-      fileInput.value = "";
-      previewDiv.innerHTML = "";
-      selectedFile = null;
-    }
-
-    async function speakLast() {
-      if (!lastBotReply) return;
+      if (!text) return;
+      appendMessage("user", text);
       try {
-        const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
+        const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: lastBotReply }),
+          body: JSON.stringify({ text }),
         });
-        const audioData = await res.arrayBuffer();
-        const blob = new Blob([audioData], { type: "audio/mpeg" });
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.play();
+        const data = await res.json();
+        lastBotReply = data.reply;
+        appendMessage("bot", lastBotReply);
       } catch (err) {
-        console.error("Ошибка при озвучке:", err);
+        appendMessage("bot", "❌ Ошибка при ответе");
       }
+      textInput.value = "";
     }
   </script>
 
