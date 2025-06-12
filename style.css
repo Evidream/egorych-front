@@ -18,6 +18,8 @@ body {
   height: 400px;
   overflow-y: scroll;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .bubble {
@@ -26,6 +28,8 @@ body {
   border-radius: 20px;
   max-width: 80%;
   word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .user {
@@ -33,6 +37,7 @@ body {
   align-self: flex-end;
   text-align: right;
   margin-left: auto;
+  color: white;
 }
 
 .bot {
@@ -40,11 +45,91 @@ body {
   align-self: flex-start;
   text-align: left;
   margin-right: auto;
+  color: white;
 }
 
 #input-container {
   margin-top: 15px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+#userInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2a2a2a;
+  color: white;
+  font-size: 16px;
+}
+
+#userInput::placeholder {
+  color: #888;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.icon-button:hover {
+  background: #333;
+}
+
+.icon-button img {
+  width: 24px;
+  height: 24px;
+}
+
+#fileInput {
+  display: none;
+}
+
+#preview {
+  margin-top: 10px;
+}
+
+#preview img {
+  max-height: 120px;
+  border-radius: 10px;
+  border: 1px solid #555;
+}
+
+#cameraPreview {
+  display: none;
+  margin-top: 10px;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+#cameraPreview video {
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+#cameraPreview button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #007aff;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+#cameraPreview button:last-child {
+  background: #444;
 }
