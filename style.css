@@ -1,58 +1,64 @@
+@font-face {
+  font-family: 'Pragmatica';
+  src: url('pragmatica_medium_1.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
 body {
   font-family: 'Pragmatica', sans-serif;
   background-color: #5c4db1;
   margin: 0;
   padding: 0;
+  color: #fff;
 }
 
 #chat {
   max-height: 70vh;
   overflow-y: auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  box-sizing: border-box;
 }
 
 .message {
   display: flex;
+  align-items: flex-end;
+  margin-bottom: 16px;
   max-width: 70%;
 }
 
 .bot {
-  align-self: flex-start;
-  background: url('assets/chat-bubble-left.svg') no-repeat;
-  background-size: contain;
-  padding: 20px 28px;
+  background-color: #fff;
   color: #303030;
+  padding: 10px 16px;
+  border-radius: 18px;
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.4px;
-  background-color: transparent;
+  align-self: flex-start;
 }
 
 .user {
-  align-self: flex-end;
-  background: url('assets/chat-bubble-right.svg') no-repeat;
-  background-size: contain;
-  padding: 20px 28px;
-  color: #ffffff;
+  background-color: #000;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 18px;
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.4px;
-  background-color: transparent;
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 #input-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
+  background: #fff;
   border-radius: 300px;
   padding: 10px 20px;
   margin: 0 20px 20px;
   box-sizing: border-box;
-  gap: 10px;
 }
 
 #textInput {
@@ -61,6 +67,10 @@ body {
   font-size: 16px;
   padding: 10px;
   font-family: 'Pragmatica', sans-serif;
+  color: #000;
+}
+
+#textInput:focus {
   outline: none;
 }
 
@@ -72,7 +82,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,29 +110,20 @@ body {
   height: 24px;
 }
 
-#cameraPreview.camera-box {
+#cameraPreview {
   display: none;
   background: #000;
   border: 7px solid rgba(255, 255, 255, 0.3);
   border-radius: 34px;
   padding: 10px;
-  width: 324px;
-  height: 576px;
-  margin: 10px 20px;
+  width: calc(100% - 40px);
+  max-width: 360px;
+  margin: 10px auto;
   box-sizing: border-box;
-  position: relative;
 }
 
 #cameraPreview video {
   width: 100%;
-  height: calc(100% - 50px);
-  object-fit: cover;
-  border-radius: 20px;
-}
-
-.camera-controls {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  padding: 0 4px;
+  height: auto;
+  border-radius: 8px;
 }
