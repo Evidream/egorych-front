@@ -32,7 +32,7 @@ function openCamera() {
       video.srcObject = stream;
       cameraPreview.style.display = "block";
     })
-    .catch(err => {
+    .catch(() => {
       appendMessage("🚫 Нет доступа к камере", "bot");
     });
 }
@@ -76,9 +76,8 @@ async function send() {
       });
 
       const data = await res.json();
-      appendMessage(`🔍 DEBUG: ${JSON.stringify(data)}`, "bot");
-      lastBotReply = data.reply?.trim() || "";
-      appendMessage(lastBotReply || "🤖 Егорыч молчит...", "bot");
+      lastBotReply = data.reply?.trim() || "🤖 Егорыч молчит...";
+      appendMessage(lastBotReply, "bot");
 
     } catch (err) {
       appendMessage("❌ Ошибка ответа от Егорыча", "bot");
@@ -99,19 +98,16 @@ async function send() {
 
       const data = await res.json();
 
-      if (data.filename) {
-        appendMessage(`✅ Файл загружен: ${data.filename}`, "bot");
-
+      if (data.base64) {
         const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ base64: await toBase64(selectedFile) })
+          body: JSON.stringify({ base64: data.base64 })
         });
 
         const visionData = await visionRes.json();
-        lastBotReply = visionData.reply?.trim() || "";
-        appendMessage(lastBotReply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-
+        lastBotReply = visionData.reply?.trim() || "🤖 Егорыч посмотрел, но ничего не понял.";
+        appendMessage(lastBotReply, "bot");
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
