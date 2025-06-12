@@ -8,6 +8,7 @@ const video = document.getElementById("video");
 let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
+let isSending = false;
 
 function appendMessage(text, sender) {
   const bubble = document.createElement("div");
@@ -59,54 +60,62 @@ function takePhoto() {
 }
 
 async function send() {
+  if (isSending) return;
+  isSending = true;
+
   const text = textInput.value.trim();
-  if (!text && !selectedFile) return;
 
   if (text) {
     appendMessage(text, "user");
+    textInput.value = "";
+
     try {
       const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
       });
+
       const data = await res.json();
-      lastBotReply = data.reply || "🤖 Егорыч молчит...";
-      appendMessage(lastBotReply, "bot");
+      lastBotReply = data.reply?.trim() || "";
+      appendMessage(lastBotReply || "🤖 Егорыч молчит...", "bot");
+
     } catch (err) {
       appendMessage("❌ Ошибка ответа от Егорыча", "bot");
     }
-    textInput.value = "";
   }
 
   if (selectedFile) {
+    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
+
     const formData = new FormData();
     formData.append("file", selectedFile);
-    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
 
     try {
       const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
         method: "POST",
         body: formData
       });
+
       const data = await res.json();
 
       if (data.filename) {
         appendMessage(`✅ Файл загружен: ${data.filename}`, "bot");
+
         const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ base64: await toBase64(selectedFile) })
         });
+
         const visionData = await visionRes.json();
-        if (visionData.reply) {
-          appendMessage(visionData.reply, "bot");
-        } else {
-          appendMessage("🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-        }
+        lastBotReply = visionData.reply?.trim() || "";
+        appendMessage(lastBotReply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
+
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
+
     } catch (err) {
       appendMessage("❌ Ошибка при загрузке", "bot");
     }
@@ -114,6 +123,8 @@ async function send() {
     selectedFile = null;
     fileInput.value = "";
   }
+
+  isSending = false;
 }
 
 sendBtn.addEventListener("click", send);
