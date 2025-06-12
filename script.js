@@ -51,7 +51,6 @@ function takePhoto() {
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0);
-
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
     appendMessage("📸 Сделан снимок", "user");
@@ -77,6 +76,7 @@ async function send() {
       });
 
       const data = await res.json();
+      appendMessage(`🔍 DEBUG: ${JSON.stringify(data)}`, "bot");
       lastBotReply = data.reply?.trim() || "";
       appendMessage(lastBotReply || "🤖 Егорыч молчит...", "bot");
 
