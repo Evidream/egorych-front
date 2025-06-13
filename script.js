@@ -1,3 +1,5 @@
+// === script.js ===
+
 const chat = document.getElementById("chat");
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -12,30 +14,159 @@ let isSending = false;
 
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
-  wrapper.className = "message-wrapper";
+  wrapper.className = `message-wrapper ${sender}`;
 
   const bubble = document.createElement("div");
-  bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
+  bubble.className = `message ${sender === "bot" ? "bubble-bot" : "bubble-user"}`;
   bubble.textContent = text;
-
   wrapper.appendChild(bubble);
 
-  // Добавляем кнопку озвучки для бота
   if (sender === "bot") {
     const speakButton = document.createElement("button");
     speakButton.className = "voice-button";
-    speakButton.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80" fill="none">
-        <rect x="5" y="5" width="70" height="70" rx="35" fill="black" stroke="#161616" stroke-width="10"/>
-        <path d="M47.328 28.3558C47.0354 28.4476 46.8289 28.591 46.5879 28.8492C46.2839 29.1762 46.1806 29.4229 46.1806 29.8015C46.1806 30.2547 46.2839 30.5071 46.6396 30.9316C49.6227 34.477 50.7185 39.0263 49.6571 43.4494C49.1924 45.3828 48.3319 47.1784 47.0698 48.8421C46.8403 49.1404 46.6109 49.4731 46.5592 49.5707C46.2953 50.0927 46.4158 50.718 46.8633 51.177C47.2419 51.5613 47.4943 51.6761 47.959 51.6761C48.5729 51.6761 48.7966 51.5155 49.5596 50.5115C50.4431 49.3469 51.4528 47.5226 51.9461 46.1859C52.4223 44.8951 52.7665 43.438 52.9271 42.0382C53.0476 41.0285 53.0132 38.6362 52.864 37.7126C52.3477 34.4196 51.0799 31.5971 48.9974 29.0959C48.7163 28.7574 48.4983 28.5566 48.3319 28.4763C48.0508 28.3443 47.5517 28.2812 47.328 28.3558Z" fill="white"/>
-        <path d="M36.5944 29.8473C36.5141 29.876 36.3936 29.9219 36.3248 29.962C36.256 29.9964 34.5349 31.4077 32.5041 33.0943L28.8038 36.1578L26.6582 36.175L24.5126 36.1922L24.2373 36.3644C24.0307 36.4906 23.9103 36.6225 23.7955 36.8462L23.6349 37.1503V40.1794V43.2027L23.7668 43.4551C23.9389 43.7821 24.3004 44.0517 24.6675 44.132C24.8454 44.1722 25.7174 44.1951 26.9049 44.1951H28.8554L32.5786 47.2816C35.2692 49.5075 36.3707 50.3909 36.5313 50.4368C37.237 50.6491 37.8737 50.3852 38.2294 49.7312L38.3499 49.5017V40.1507V30.7996L38.2237 30.5644C37.9082 29.9735 37.2025 29.6637 36.5944 29.8473Z" fill="white"/>
-        <path d="M42.5894 33.0026C42.0042 33.2665 41.5912 33.8574 41.5912 34.431C41.5912 34.8269 41.6772 35.0162 42.1362 35.6587C44.0236 38.2862 44.081 41.7857 42.2853 44.4476C41.8149 45.1417 41.7289 45.5089 41.9125 46.0424C42.0157 46.3522 42.4058 46.7767 42.75 46.9603C43.2491 47.2185 43.9662 47.098 44.3506 46.6792C44.7292 46.2776 45.3832 45.159 45.7389 44.3042C46.8748 41.6021 46.8519 38.5501 45.6758 35.8251C45.2628 34.8843 44.3449 33.4787 43.9318 33.1632C43.5647 32.8878 42.9967 32.819 42.5894 33.0026Z" fill="white"/>
-      </svg>
-    `;
     speakButton.onclick = speakLast;
+
+    const img = document.createElement("img");
+    img.src = "assets/listen-button.svg";
+    img.alt = "Озвучить";
+    speakButton.appendChild(img);
+
     wrapper.appendChild(speakButton);
   }
 
   chat.appendChild(wrapper);
   chat.scrollTop = chat.scrollHeight;
+}
+
+fileInput.addEventListener("change", () => {
+  selectedFile = fileInput.files[0];
+  if (selectedFile) {
+    appendMessage(`\ud83d\udccE Готов к отправке: ${selectedFile.name}`, "user");
+  }
+});
+
+function openCamera() {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      mediaStream = stream;
+      video.srcObject = stream;
+      cameraPreview.style.display = "block";
+    })
+    .catch(() => {
+      appendMessage("\ud83d\udeab Нет доступа к камере", "bot");
+    });
+}
+
+function closeCamera() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
+  }
+  cameraPreview.style.display = "none";
+}
+
+function takePhoto() {
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+    selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
+    appendMessage("\ud83d\udcf8 Сделан снимок", "user");
+    closeCamera();
+  }, "image/jpeg", 0.95);
+}
+
+async function send() {
+  if (isSending) return;
+  isSending = true;
+
+  const text = textInput.value.trim();
+
+  if (text) {
+    appendMessage(text, "user");
+    textInput.value = "";
+
+    try {
+      const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await res.json();
+      lastBotReply = data.reply?.trim() || "\ud83e\udd16 Егорыч молчит...";
+      appendMessage(lastBotReply, "bot");
+    } catch (err) {
+      appendMessage("\u274c Ошибка ответа от Егорыча", "bot");
+    }
+  }
+
+  if (selectedFile) {
+    appendMessage(`\ud83d\udce4 Отправка файла: ${selectedFile.name}`, "user");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (data.base64) {
+        const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ base64: data.base64 })
+        });
+
+        const visionData = await visionRes.json();
+        lastBotReply = visionData.reply?.trim() || "\ud83e\udd16 Егорыч посмотрел, но ничего не понял.";
+        appendMessage(lastBotReply, "bot");
+      } else {
+        appendMessage("\u274c Ошибка загрузки файла", "bot");
+      }
+
+    } catch (err) {
+      appendMessage("\u274c Ошибка при загрузке", "bot");
+    }
+
+    selectedFile = null;
+    fileInput.value = "";
+  }
+
+  isSending = false;
+}
+
+sendBtn.addEventListener("click", send);
+
+async function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = error => reject(error);
+  });
+}
+
+async function speakLast() {
+  if (!lastBotReply) return;
+  try {
+    const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: lastBotReply })
+    });
+    const audioData = await res.arrayBuffer();
+    const blob = new Blob([audioData], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+  } catch (err) {
+    appendMessage("\u274c Ошибка озвучки", "bot");
+  }
 }
