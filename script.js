@@ -1,5 +1,3 @@
-// === script.js ===
-
 const chat = document.getElementById("chat");
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -14,24 +12,25 @@ let isSending = false;
 
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
-  wrapper.className = `message-wrapper ${sender}`;
-
-  const bubble = document.createElement("div");
-  bubble.className = `message ${sender === "bot" ? "bubble-bot" : "bubble-user"}`;
-  bubble.textContent = text;
-  wrapper.appendChild(bubble);
 
   if (sender === "bot") {
-    const speakButton = document.createElement("button");
-    speakButton.className = "voice-button";
-    speakButton.onclick = speakLast;
+    wrapper.className = "bot-bubble-wrapper";
 
-    const img = document.createElement("img");
-    img.src = "assets/listen-button.svg";
-    img.alt = "Озвучить";
-    speakButton.appendChild(img);
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
+    bubble.textContent = text;
 
-    wrapper.appendChild(speakButton);
+    const button = document.createElement("img");
+    button.src = "assets/listen-button.svg";
+    button.className = "listen-button";
+    button.alt = "Озвучить";
+    button.onclick = speakLast;
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(button);
+  } else {
+    wrapper.className = "message user";
+    wrapper.textContent = text;
   }
 
   chat.appendChild(wrapper);
@@ -41,7 +40,7 @@ function appendMessage(text, sender) {
 fileInput.addEventListener("change", () => {
   selectedFile = fileInput.files[0];
   if (selectedFile) {
-    appendMessage(`\ud83d\udccE Готов к отправке: ${selectedFile.name}`, "user");
+    appendMessage(`📎 Готов к отправке: ${selectedFile.name}`, "user");
   }
 });
 
@@ -53,7 +52,7 @@ function openCamera() {
       cameraPreview.style.display = "block";
     })
     .catch(() => {
-      appendMessage("\ud83d\udeab Нет доступа к камере", "bot");
+      appendMessage("🚫 Нет доступа к камере", "bot");
     });
 }
 
@@ -73,7 +72,7 @@ function takePhoto() {
   ctx.drawImage(video, 0, 0);
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-    appendMessage("\ud83d\udcf8 Сделан снимок", "user");
+    appendMessage("📸 Сделан снимок", "user");
     closeCamera();
   }, "image/jpeg", 0.95);
 }
@@ -96,15 +95,16 @@ async function send() {
       });
 
       const data = await res.json();
-      lastBotReply = data.reply?.trim() || "\ud83e\udd16 Егорыч молчит...";
+      lastBotReply = data.reply?.trim() || "🤖 Егорыч молчит...";
       appendMessage(lastBotReply, "bot");
+
     } catch (err) {
-      appendMessage("\u274c Ошибка ответа от Егорыча", "bot");
+      appendMessage("❌ Ошибка ответа от Егорыча", "bot");
     }
   }
 
   if (selectedFile) {
-    appendMessage(`\ud83d\udce4 Отправка файла: ${selectedFile.name}`, "user");
+    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -125,14 +125,14 @@ async function send() {
         });
 
         const visionData = await visionRes.json();
-        lastBotReply = visionData.reply?.trim() || "\ud83e\udd16 Егорыч посмотрел, но ничего не понял.";
+        lastBotReply = visionData.reply?.trim() || "🤖 Егорыч посмотрел, но ничего не понял.";
         appendMessage(lastBotReply, "bot");
       } else {
-        appendMessage("\u274c Ошибка загрузки файла", "bot");
+        appendMessage("❌ Ошибка загрузки файла", "bot");
       }
 
     } catch (err) {
-      appendMessage("\u274c Ошибка при загрузке", "bot");
+      appendMessage("❌ Ошибка при загрузке", "bot");
     }
 
     selectedFile = null;
@@ -143,15 +143,6 @@ async function send() {
 }
 
 sendBtn.addEventListener("click", send);
-
-async function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = error => reject(error);
-  });
-}
 
 async function speakLast() {
   if (!lastBotReply) return;
@@ -167,6 +158,6 @@ async function speakLast() {
     const audio = new Audio(url);
     audio.play();
   } catch (err) {
-    appendMessage("\u274c Ошибка озвучки", "bot");
+    appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
