@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Егорыч</title>
 
-  <!-- preload шрифта -->
   <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
-
-  <!-- внешний CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- подключение шрифта -->
   <style>
     @font-face {
       font-family: 'Pragmatica';
@@ -22,15 +18,11 @@
   </style>
 </head>
 <body>
-  <div id="chat" class="chat-container">
-    <!-- Пример одного бабла с кнопкой озвучки -->
-    <div class="bot-wrapper">
-      <div class="bubble-bot">
-        Привет! Как я могу помочь вам сегодня?
-      </div>
-      <button class="listen-button" onclick="speakLast()">
-        <img src="assets/listen-button.svg" alt="Озвучить" />
-      </button>
+  <div class="chat-container" id="chat">
+    <!-- Пример ответа с кнопкой озвучки -->
+    <div class="bot-bubble-wrapper">
+      <div class="bubble-bot">Привет! Как я могу помочь вам сегодня?</div>
+      <img src="assets/listen-button.svg" class="listen-button" alt="Озвучить" onclick="speakLast()" />
     </div>
   </div>
 
@@ -56,7 +48,7 @@
       <img src="assets/fluent_camera.svg" alt="Камера" />
     </button>
     <div id="sendBtn" class="send-button">
-      <img src="assets/send-button.svg" class="send-icon" alt="Отправить" />
+      <img src="assets/send-button.svg" alt="Отправить" class="send-icon" />
     </div>
   </div>
 
