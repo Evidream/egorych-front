@@ -19,25 +19,22 @@
       font-weight: 500;
       font-style: normal;
     }
-    body {
-      background: #4544A5;
-    }
   </style>
 </head>
 <body>
-  <div id="chat">
-    <!-- Пример одного бабла -->
-    <div class="message-wrapper">
+  <div id="chat" class="chat-container">
+    <!-- Пример одного бабла с кнопкой озвучки -->
+    <div class="bot-wrapper">
       <div class="bubble-bot">
         Привет! Как я могу помочь вам сегодня?
       </div>
-      <button class="voice-button" onclick="playLastResponse()">
-        <img src="assets/voice-button.svg" alt="Озвучить" />
+      <button class="listen-button" onclick="speakLast()">
+        <img src="assets/listen-button.svg" alt="Озвучить" />
       </button>
     </div>
   </div>
 
-  <div id="cameraPreview">
+  <div id="cameraPreview" class="camera-preview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
       <button class="icon-button" onclick="takePhoto()">
@@ -49,7 +46,7 @@
     </div>
   </div>
 
-  <div id="input-container">
+  <div id="input-container" class="input-container">
     <input type="text" id="textInput" placeholder="Что на душе?" />
     <label for="fileInput" class="icon-button">
       <img src="assets/ant-design_paper-clip-outlined.svg" alt="Прикрепить" />
@@ -58,8 +55,8 @@
     <button class="icon-button" onclick="openCamera()">
       <img src="assets/fluent_camera.svg" alt="Камера" />
     </button>
-    <div id="sendBtn" onclick="send()">
-      <img src="assets/send-button.svg" alt="Отправить" />
+    <div id="sendBtn" class="send-button">
+      <img src="assets/send-button.svg" class="send-icon" alt="Отправить" />
     </div>
   </div>
 
