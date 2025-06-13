@@ -1,4 +1,4 @@
-/* === Основные цвета === */
+/* === Основные цвета и настройки === */
 body {
   background-color: #4544A5;
   margin: 0;
@@ -10,7 +10,7 @@ body {
   overflow: hidden;
 }
 
-.chat-container {
+#chat {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
@@ -22,7 +22,7 @@ body {
 .message-wrapper {
   display: flex;
   align-items: center;
-  margin: 16px;
+  gap: 10px;
 }
 
 .bubble-bot {
@@ -46,21 +46,21 @@ body {
   padding: 0 24px;
 }
 
-.speak-button {
+.listen-button {
   width: 80px;
   height: 80px;
   flex-shrink: 0;
+  background: url("assets/listen-button.svg") no-repeat center center;
+  background-size: contain;
   border: none;
-  background: transparent;
-  padding: 0;
-  margin-left: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
 }
 
-.input-container {
+.listen-button:hover {
+  background-image: url("assets/listen-button-hover.svg");
+}
+
+#input-container {
   display: flex;
   align-items: center;
   padding: 12px;
@@ -69,7 +69,7 @@ body {
   margin: 16px;
 }
 
-.input-container input[type="text"] {
+#textInput {
   flex: 1;
   border: none;
   outline: none;
@@ -79,14 +79,17 @@ body {
   font-family: 'Pragmatica', sans-serif;
 }
 
-.input-container .icon {
+.icon-button {
   width: 24px;
   height: 24px;
   margin: 0 8px;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 }
 
-.send-button {
+#sendBtn {
   background-color: #a240e5;
   border: none;
   border-radius: 50%;
@@ -95,13 +98,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
   margin-left: 8px;
-}
-
-.send-icon {
-  width: 24px;
-  height: 24px;
+  cursor: pointer;
 }
 
 .camera-preview {
@@ -126,7 +124,7 @@ body {
   gap: 12px;
 }
 
-.camera-buttons .icon {
+.camera-buttons .icon-button {
   background-color: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
   padding: 8px;
@@ -134,9 +132,9 @@ body {
   height: 32px;
 }
 
-/* Mobile */
+/* Mobile адаптация */
 @media (max-width: 768px) {
-  .chat-container {
+  #chat {
     padding: 12px;
     gap: 8px;
   }
@@ -146,18 +144,13 @@ body {
     height: auto;
   }
 
-  .input-container {
+  #input-container {
     margin: 12px;
     padding: 10px;
   }
 
-  .send-button {
+  #sendBtn {
     width: 40px;
     height: 40px;
-  }
-
-  .send-icon {
-    width: 20px;
-    height: 20px;
   }
 }
