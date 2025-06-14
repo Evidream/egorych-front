@@ -1,12 +1,12 @@
-/* === GLOBAL === */
+/* === Основные настройки === */
 body {
-  background: #4544A5;
+  background-color: #4544A5;
   margin: 0;
   padding: 40px;
   font-family: 'Pragmatica', sans-serif;
 }
 
-/* === BOT BUBBLE === */
+/* === Обертка бота === */
 .bubble-wrapper {
   display: flex;
   align-items: center;
@@ -18,31 +18,35 @@ body {
   width: 15.434px;
   height: 15.434px;
   border-radius: 50%;
-  background: #FFF;
+  background: #FFFFFF;
 }
 
 .bubble-bot {
   width: 767px;
   height: 83px;
   border-radius: 300px;
-  background: #FFF;
-  color: #303030;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.4px;
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   padding: 0 40px;
+  font-size: 20px;
+  color: #303030;
+  font-weight: 500;
+  letter-spacing: -0.4px;
 }
 
 .listen-button {
   width: 80px;
   height: 80px;
-  flex-shrink: 0;
   cursor: pointer;
+  transition: transform 0.2s;
 }
 
-/* === USER BUBBLE === */
+.listen-button:hover {
+  transform: scale(1.05);
+}
+
+/* === Обертка пользователя === */
 .user-wrapper {
   display: flex;
   align-items: center;
@@ -56,14 +60,14 @@ body {
   height: 80px;
   border-radius: 300px;
   background: #1F1F1F;
-  color: #FFF;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 24px;
+  padding: 0 30px;
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: 500;
+  letter-spacing: -0.4px;
 }
 
 .user-circle {
@@ -73,40 +77,45 @@ body {
   background: #1F1F1F;
 }
 
-/* === INPUT AREA === */
+/* === Инпут и кнопки === */
 .input-container {
   display: flex;
   align-items: center;
-  margin-top: 40px;
-  gap: 15px;
+  padding: 4px 4px 4px 40px;
+  background: #FFFFFF;
+  border-radius: 300px;
+  max-width: 100%;
 }
 
-.input-container input {
+.input-container input[type="text"] {
   flex: 1;
-  padding: 20px 30px;
-  border-radius: 40px;
   border: none;
+  outline: none;
   font-size: 20px;
+  font-family: 'Pragmatica', sans-serif;
+  padding: 20px 0;
 }
 
-.icon-clip,
-.icon-camera {
+.icon-clip {
   width: 36px;
   height: 36px;
+  margin: 0 15px;
   cursor: pointer;
 }
 
-.camera {
+.icon-camera {
   width: 32.583px;
   height: 32.583px;
+  margin-right: 15px;
+  cursor: pointer;
 }
 
 .send-button {
   width: 75px;
   height: 75px;
   border-radius: 3000px;
-  background: #8704B5;
   border: 8px solid #9221BA;
+  background: #8704B5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,68 +127,51 @@ body {
   height: 28.846px;
 }
 
-/* === CAMERA PREVIEW === */
-.camera-preview {
-  width: 324px;
-  height: 576px;
-  border-radius: 34.286px;
-  border: 7.347px solid rgba(255, 255, 255, 0.30);
-  background: #000;
-  overflow: hidden;
-}
-
-/* === CAMERA BUTTONS === */
-.camera-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.camera-button {
-  width: 150px;
-  height: 80px;
-  border-radius: 40px;
-  background: #202020;
-  cursor: pointer;
-}
-
-/* === MEDIA MOBILE === */
+/* === Мобильная адаптация === */
 @media (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
   .bubble-wrapper, .user-wrapper {
+    gap: 5px;
     margin-bottom: 20px;
   }
 
   .bubble-bot {
     width: auto;
-    max-width: 100%;
     height: auto;
     padding: 20px;
+    font-size: 18px;
   }
 
   .bubble-user {
     width: auto;
-    max-width: 60%;
     height: auto;
     padding: 20px;
-  }
-
-  .listen-button {
-    width: 60px;
-    height: 60px;
+    font-size: 18px;
   }
 
   .input-container {
-    gap: 10px;
+    padding: 3px 3px 3px 20px;
+  }
+
+  .icon-clip {
+    margin: 0 10px;
+  }
+
+  .icon-camera {
+    margin-right: 10px;
   }
 
   .send-button {
     width: 60px;
     height: 60px;
-    border: 6px solid #9221BA;
+    border-width: 6px;
   }
 
   .send-icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 }
