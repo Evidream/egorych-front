@@ -2,56 +2,34 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Егорыч</title>
-
-  <link rel="preload" href="pragmatica_medium_1.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="style.css" />
-
-  <style>
-    @font-face {
-      font-family: 'Pragmatica';
-      src: url('pragmatica_medium_1.ttf') format('truetype');
-      font-weight: 500;
-      font-style: normal;
-    }
-  </style>
 </head>
 <body>
-  <div class="chat-container" id="chat">
-    <!-- Пример ответа с кнопкой озвучки -->
-    <div class="bot-bubble-wrapper">
-      <div class="bubble-bot">Привет! Как я могу помочь вам сегодня?</div>
-      <img src="assets/listen-button.svg" class="listen-button" alt="Озвучить" onclick="speakLast()" />
+
+  <!-- Bot bubble -->
+  <div class="bubble-wrapper">
+    <div class="bot-circle"></div>
+    <div class="bubble-bot">Привет! Я Егорыч. Чем могу помочь?</div>
+    <img class="listen-button" src="assets/listen-icon.svg" alt="Слушать"/>
+  </div>
+
+  <!-- User bubble -->
+  <div class="user-wrapper">
+    <div class="bubble-user">Что на душе?</div>
+    <div class="user-circle"></div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-container">
+    <input type="text" placeholder="Напиши что-то..." />
+    <img class="icon-clip" src="assets/clip-icon.svg" alt="Скрепка"/>
+    <img class="icon-camera" src="assets/camera-icon.svg" alt="Камера"/>
+    <div class="send-button">
+      <img class="send-icon" src="assets/send-icon.svg" alt="Отправить"/>
     </div>
   </div>
 
-  <div id="cameraPreview" class="camera-preview">
-    <video id="video" autoplay playsinline></video>
-    <div class="camera-buttons">
-      <button class="icon-button" onclick="takePhoto()">
-        <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок" />
-      </button>
-      <button class="icon-button" onclick="closeCamera()">
-        <img src="assets/attachment-preview-button-close.svg" alt="Закрыть камеру" />
-      </button>
-    </div>
-  </div>
-
-  <div id="input-container" class="input-container">
-    <input type="text" id="textInput" placeholder="Что на душе?" />
-    <label for="fileInput" class="icon-button">
-      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Прикрепить" />
-    </label>
-    <input type="file" id="fileInput" />
-    <button class="icon-button" onclick="openCamera()">
-      <img src="assets/fluent_camera.svg" alt="Камера" />
-    </button>
-    <div id="sendBtn" class="send-button">
-      <img src="assets/send-button.svg" alt="Отправить" class="send-icon" />
-    </div>
-  </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
