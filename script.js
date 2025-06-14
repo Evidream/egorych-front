@@ -9,7 +9,7 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-// Добавляем ENTER отправку
+// ENTER отправка
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -176,7 +176,7 @@ async function speakLast() {
     const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: lastBotReply })
+      body: JSON.stringify({ text: lastBotReply }) // ← Исправлено поле
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
