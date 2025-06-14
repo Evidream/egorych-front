@@ -1,4 +1,3 @@
-const chat = document.getElementById("chat");
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 const fileInput = document.getElementById("fileInput");
@@ -10,42 +9,7 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-// Создание бабла
-function appendMessage(text, sender) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `${sender}-wrapper`;
-
-  const circle = document.createElement("div");
-  circle.className = sender === "bot" ? "bot-circle" : "user-circle";
-
-  const bubble = document.createElement("div");
-  bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
-  bubble.textContent = text;
-
-  wrapper.appendChild(circle);
-  wrapper.appendChild(bubble);
-
-  if (sender === "bot") {
-    const listenBtn = document.createElement("img");
-    listenBtn.src = "assets/listen-button.svg";
-    listenBtn.className = "listen-button";
-    listenBtn.onclick = speakLast;
-    wrapper.appendChild(listenBtn);
-  }
-
-  chat.appendChild(wrapper);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-// Скрепка
-fileInput.addEventListener("change", () => {
-  selectedFile = fileInput.files[0];
-  if (selectedFile) {
-    appendMessage(`📎 Готов к отправке: ${selectedFile.name}`, "user");
-  }
-});
-
-// Камера
+// === Камера ===
 function openCamera() {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
@@ -53,7 +17,9 @@ function openCamera() {
       video.srcObject = stream;
       cameraPreview.style.display = "block";
     })
-    .catch(() => appendMessage("🚫 Нет доступа к камере", "bot"));
+    .catch(() => {
+      alert("Нет доступа к камере");
+    });
 }
 
 function closeCamera() {
@@ -72,20 +38,30 @@ function takePhoto() {
   ctx.drawImage(video, 0, 0);
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-    appendMessage("📸 Сделан снимок", "user");
+    alert("📸 Снимок сделан и готов к отправке");
     closeCamera();
   }, "image/jpeg", 0.95);
 }
 
-// Отправка
+// === Скрепка ===
+fileInput.addEventListener("change", () => {
+  selectedFile = fileInput.files[0];
+  if (selectedFile) {
+    alert(`📎 Прикреплен файл: ${selectedFile.name}`);
+  }
+});
+
+// === Отправка ===
+sendBtn.addEventListener("click", send);
+
 async function send() {
   if (isSending) return;
   isSending = true;
 
   const text = textInput.value.trim();
+
   if (text) {
-    appendMessage(text, "user");
-    textInput.value = "";
+    console.log("📝 Текст:", text);
 
     try {
       const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
@@ -93,16 +69,18 @@ async function send() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
       });
+
       const data = await res.json();
       lastBotReply = data.reply?.trim() || "🤖 Егорыч молчит...";
-      appendMessage(lastBotReply, "bot");
+      console.log("🤖 Ответ:", lastBotReply);
     } catch {
-      appendMessage("❌ Ошибка ответа от Егорыча", "bot");
+      console.log("❌ Ошибка ответа Егорыча");
     }
   }
 
   if (selectedFile) {
-    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
+    console.log("📤 Отправка файла:", selectedFile.name);
+
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -111,32 +89,36 @@ async function send() {
         method: "POST",
         body: formData
       });
+
       const data = await res.json();
+
       if (data.base64) {
         const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ base64: data.base64 })
         });
+
         const visionData = await visionRes.json();
         lastBotReply = visionData.reply?.trim() || "🤖 Егорыч посмотрел, но ничего не понял.";
-        appendMessage(lastBotReply, "bot");
+        console.log("🧿 Vision ответ:", lastBotReply);
       } else {
-        appendMessage("❌ Ошибка загрузки файла", "bot");
+        console.log("❌ Ошибка загрузки файла");
       }
+
     } catch {
-      appendMessage("❌ Ошибка при загрузке", "bot");
+      console.log("❌ Ошибка при загрузке");
     }
 
     selectedFile = null;
     fileInput.value = "";
   }
 
+  textInput.value = "";
   isSending = false;
 }
 
-sendBtn.addEventListener("click", send);
-
+// === Озвучка ===
 async function speakLast() {
   if (!lastBotReply) return;
   try {
@@ -148,9 +130,8 @@ async function speakLast() {
     const audioData = await res.arrayBuffer();
     const blob = new Blob([audioData], { type: "audio/mpeg" });
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.play();
+    new Audio(url).play();
   } catch {
-    appendMessage("❌ Ошибка озвучки", "bot");
+    console.log("❌ Ошибка озвучки");
   }
 }
