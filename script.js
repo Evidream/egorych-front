@@ -1,3 +1,4 @@
+const chat = document.getElementById("chat");
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 const fileInput = document.getElementById("fileInput");
@@ -7,9 +8,49 @@ const video = document.getElementById("video");
 let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
-let isSending = false;
 
-// === Камера ===
+function appendMessage(text, sender) {
+  const wrapper = document.createElement("div");
+  wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
+
+  if (sender === "bot") {
+    const circle = document.createElement("div");
+    circle.className = "bot-circle";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
+    bubble.textContent = text;
+    const listenBtn = document.createElement("img");
+    listenBtn.src = "assets/listen-button.svg";
+    listenBtn.className = "listen-button";
+    listenBtn.onclick = speakLast;
+
+    wrapper.appendChild(circle);
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
+
+    lastBotReply = text;
+  } else {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-user";
+    bubble.textContent = text;
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
+  }
+
+  chat.appendChild(wrapper);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+fileInput.addEventListener("change", () => {
+  selectedFile = fileInput.files[0];
+  if (selectedFile) {
+    appendMessage(`📎 ${selectedFile.name} готово`, "user");
+  }
+});
+
 function openCamera() {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
@@ -18,7 +59,7 @@ function openCamera() {
       cameraPreview.style.display = "block";
     })
     .catch(() => {
-      alert("Нет доступа к камере");
+      appendMessage("🚫 Нет доступа к камере", "bot");
     });
 }
 
@@ -38,100 +79,65 @@ function takePhoto() {
   ctx.drawImage(video, 0, 0);
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-    alert("📸 Снимок сделан и готов к отправке");
+    appendMessage("📸 Снимок сделан", "user");
     closeCamera();
   }, "image/jpeg", 0.95);
 }
 
-// === Скрепка ===
-fileInput.addEventListener("change", () => {
-  selectedFile = fileInput.files[0];
-  if (selectedFile) {
-    alert(`📎 Прикреплен файл: ${selectedFile.name}`);
-  }
-});
-
-// === Отправка ===
-sendBtn.addEventListener("click", send);
-
 async function send() {
-  if (isSending) return;
-  isSending = true;
-
   const text = textInput.value.trim();
+  if (!text && !selectedFile) return;
 
   if (text) {
-    console.log("📝 Текст:", text);
+    appendMessage(text, "user");
+    textInput.value = "";
 
-    try {
-      const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-
-      const data = await res.json();
-      lastBotReply = data.reply?.trim() || "🤖 Егорыч молчит...";
-      console.log("🤖 Ответ:", lastBotReply);
-    } catch {
-      console.log("❌ Ошибка ответа Егорыча");
-    }
+    const res = await fetch("https://egorych-backend-production.up.railway.app/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
   }
 
   if (selectedFile) {
-    console.log("📤 Отправка файла:", selectedFile.name);
-
     const formData = new FormData();
     formData.append("file", selectedFile);
 
-    try {
-      const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
+    const res = await fetch("https://egorych-backend-production.up.railway.app/upload", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (data.base64) {
+      const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
         method: "POST",
-        body: formData
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base64: data.base64 })
       });
-
-      const data = await res.json();
-
-      if (data.base64) {
-        const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ base64: data.base64 })
-        });
-
-        const visionData = await visionRes.json();
-        lastBotReply = visionData.reply?.trim() || "🤖 Егорыч посмотрел, но ничего не понял.";
-        console.log("🧿 Vision ответ:", lastBotReply);
-      } else {
-        console.log("❌ Ошибка загрузки файла");
-      }
-
-    } catch {
-      console.log("❌ Ошибка при загрузке");
+      const visionData = await visionRes.json();
+      appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но не понял.", "bot");
     }
-
     selectedFile = null;
     fileInput.value = "";
   }
-
-  textInput.value = "";
-  isSending = false;
 }
 
-// === Озвучка ===
+textInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") send();
+});
+
 async function speakLast() {
   if (!lastBotReply) return;
-  try {
-    const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: lastBotReply })
-    });
-    const audioData = await res.arrayBuffer();
-    const blob = new Blob([audioData], { type: "audio/mpeg" });
-    const url = URL.createObjectURL(blob);
-    new Audio(url).play();
-  } catch {
-    console.log("❌ Ошибка озвучки");
-  }
+  const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: lastBotReply })
+  });
+  const audioData = await res.arrayBuffer();
+  const blob = new Blob([audioData], { type: "audio/mpeg" });
+  const url = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+  audio.play();
 }
