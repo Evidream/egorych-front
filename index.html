@@ -8,29 +8,47 @@
 </head>
 <body>
 
-  <!-- ЧАТ -->
-  <div id="chat"></div>
+  <!-- Bot bubble -->
+  <div class="bubble-wrapper">
+    <div class="bot-circle"></div>
+    <div class="bubble-bot">Привет! Я Егорыч. Чем могу помочь?</div>
+    <img class="listen-button" src="assets/listen-button.svg" alt="Слушать" onclick="speakLast()"/>
+  </div>
 
-  <!-- Поле предпросмотра камеры -->
+  <!-- User bubble -->
+  <div class="user-wrapper">
+    <div class="bubble-user">Что на душе?</div>
+    <div class="user-circle"></div>
+  </div>
+
+  <!-- Camera preview (скрыто по умолчанию) -->
   <div id="cameraPreview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
-      <button onclick="takePhoto()">📸</button>
-      <button onclick="closeCamera()">❌</button>
+      <button onclick="takePhoto()">
+        <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок"/>
+      </button>
+      <button onclick="closeCamera()">
+        <img src="assets/attachment-preview-button-close.svg" alt="Закрыть камеру"/>
+      </button>
     </div>
   </div>
 
-  <!-- Поле ввода и кнопки -->
+  <!-- Input -->
   <div class="input-container">
-    <input type="text" id="textInput" placeholder="Напиши что-то..." />
-    <label for="fileInput" class="icon-clip"></label>
-    <input type="file" id="fileInput" />
-    <button class="icon-camera" onclick="openCamera()"></button>
-    <button class="send-button" id="sendBtn">
-      <img class="send-icon" src="assets/send-button.svg" alt="Отправить">
-    </button>
+    <input id="textInput" type="text" placeholder="Напиши что-то..." />
+    <label for="fileInput">
+      <img class="icon-clip" src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
+    </label>
+    <input type="file" id="fileInput" style="display:none"/>
+    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
+    <div id="sendBtn" class="send-button">
+      <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
+    </div>
   </div>
 
+  <!-- Скрипт -->
   <script src="script.js"></script>
+
 </body>
 </html>
