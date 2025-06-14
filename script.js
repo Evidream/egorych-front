@@ -17,6 +17,7 @@ textInput.addEventListener("keydown", (e) => {
   }
 });
 
+// Скрепка
 clipBtn.addEventListener("click", () => {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
@@ -32,6 +33,7 @@ clipBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
+// Камера
 cameraBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
@@ -176,7 +178,7 @@ async function speakLast() {
     const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: lastBotReply }) // ← Исправлено поле
+      body: JSON.stringify({ text: lastBotReply }) // ✅ ИМЕННО text, НЕ message!
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
