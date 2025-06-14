@@ -21,34 +21,32 @@
     <div class="user-circle"></div>
   </div>
 
-  <!-- Camera preview (скрыто по умолчанию) -->
+  <!-- Камера предпросмотр -->
   <div id="cameraPreview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
       <button onclick="takePhoto()">
-        <img src="assets/attachment-preview-button-photo.svg" alt="Сделать снимок"/>
+        <img src="assets/attachment-preview-button-photo.svg" alt="Снимок"/>
       </button>
       <button onclick="closeCamera()">
-        <img src="assets/attachment-preview-button-close.svg" alt="Закрыть камеру"/>
+        <img src="assets/attachment-preview-button-close.svg" alt="Закрыть"/>
       </button>
     </div>
   </div>
 
   <!-- Input -->
   <div class="input-container">
-    <input id="textInput" type="text" placeholder="Напиши что-то..." />
+    <input type="text" id="textInput" placeholder="Напиши что-то..." />
     <label for="fileInput">
       <img class="icon-clip" src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
     </label>
-    <input type="file" id="fileInput" style="display:none"/>
+    <input type="file" id="fileInput" style="display:none;" />
     <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
     <div id="sendBtn" class="send-button">
       <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
     </div>
   </div>
 
-  <!-- Скрипт -->
   <script src="script.js"></script>
-
 </body>
 </html>
