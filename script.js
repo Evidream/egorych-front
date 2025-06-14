@@ -1,16 +1,15 @@
 const chat = document.getElementById("chat");
-const textInput = document.getElementById("textInput");
-const sendBtn = document.getElementById("sendBtn");
-const fileInput = document.getElementById("fileInput");
-const cameraPreview = document.getElementById("cameraPreview");
-const video = document.getElementById("video");
+const textInput = document.querySelector(".input-container input");
+const sendBtn = document.querySelector(".send-button");
+const clipBtn = document.querySelector(".icon-clip");
+const cameraBtn = document.querySelector(".icon-camera");
 
 let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-// Добавляем по Enter
+// Добавляем ENTER отправку
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -18,65 +17,98 @@ textInput.addEventListener("keydown", (e) => {
   }
 });
 
-fileInput.addEventListener("change", () => {
-  selectedFile = fileInput.files[0];
-  if (selectedFile) {
+clipBtn.addEventListener("click", () => {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.style.display = "none";
+  document.body.appendChild(fileInput);
+
+  fileInput.addEventListener("change", () => {
+    selectedFile = fileInput.files[0];
     appendMessage(`📎 Готов к отправке: ${selectedFile.name}`, "user");
-  }
+    document.body.removeChild(fileInput);
+  });
+
+  fileInput.click();
 });
 
-function appendMessage(text, sender) {
-  const bubble = document.createElement("div");
-  bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
-  bubble.textContent = text;
+cameraBtn.addEventListener("click", () => {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      mediaStream = stream;
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      document.body.appendChild(video);
 
-  // Для бота добавляем кнопку прослушать
+      const snapBtn = document.createElement("button");
+      snapBtn.innerText = "📸";
+      document.body.appendChild(snapBtn);
+
+      snapBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+          selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+          appendMessage("📸 Снимок готов", "user");
+          stopCamera(video, snapBtn);
+        }, "image/jpeg");
+      });
+    })
+    .catch(() => {
+      appendMessage("🚫 Нет доступа к камере", "bot");
+    });
+});
+
+function stopCamera(video, snapBtn) {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
+  }
+  video.remove();
+  snapBtn.remove();
+}
+
+function appendMessage(text, sender) {
+  const wrapper = document.createElement("div");
+  wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
+
   if (sender === "bot") {
+    const circle = document.createElement("div");
+    circle.className = "bot-circle";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
+    bubble.textContent = text;
+
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
     listenBtn.alt = "Слушать";
     listenBtn.className = "listen-button";
     listenBtn.onclick = speakLast;
-    bubble.appendChild(listenBtn);
 
-    lastBotReply = text; // сохраняем только для бота
+    wrapper.appendChild(circle);
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
+
+    lastBotReply = text;
+  } else {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-user";
+    bubble.textContent = text;
+
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
   }
 
-  chat.appendChild(bubble);
+  chat.appendChild(wrapper);
   chat.scrollTop = chat.scrollHeight;
-}
-
-function openCamera() {
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      mediaStream = stream;
-      video.srcObject = stream;
-      cameraPreview.style.display = "block";
-    })
-    .catch(() => {
-      appendMessage("🚫 Нет доступа к камере", "bot");
-    });
-}
-
-function closeCamera() {
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
-    mediaStream = null;
-  }
-  cameraPreview.style.display = "none";
-}
-
-function takePhoto() {
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0);
-  canvas.toBlob(blob => {
-    selectedFile = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
-    appendMessage("📸 Сделан снимок", "user");
-    closeCamera();
-  }, "image/jpeg", 0.95);
 }
 
 async function send() {
@@ -84,8 +116,6 @@ async function send() {
   isSending = true;
 
   const text = textInput.value.trim();
-
-  // Если есть текст
   if (text) {
     appendMessage(text, "user");
     textInput.value = "";
@@ -98,12 +128,11 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-    } catch (err) {
-      appendMessage("❌ Ошибка ответа от Егорыча", "bot");
+    } catch {
+      appendMessage("❌ Ошибка ответа", "bot");
     }
   }
 
-  // Если есть файл
   if (selectedFile) {
     appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
 
@@ -128,16 +157,17 @@ async function send() {
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
-    } catch (err) {
+    } catch {
       appendMessage("❌ Ошибка при загрузке", "bot");
     }
 
     selectedFile = null;
-    fileInput.value = "";
   }
 
   isSending = false;
 }
+
+sendBtn.addEventListener("click", send);
 
 async function speakLast() {
   if (!lastBotReply) return;
@@ -149,14 +179,9 @@ async function speakLast() {
       body: JSON.stringify({ message: lastBotReply })
     });
     const audioData = await res.arrayBuffer();
-    const blob = new Blob([audioData], { type: "audio/mpeg" });
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
+    const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
     audio.play();
-  } catch (err) {
+  } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
-
-// Кнопка отправки
-sendBtn.addEventListener("click", send);
