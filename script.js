@@ -10,33 +10,34 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
+// Создание бабла
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
+  wrapper.className = `${sender}-wrapper`;
+
+  const circle = document.createElement("div");
+  circle.className = sender === "bot" ? "bot-circle" : "user-circle";
+
+  const bubble = document.createElement("div");
+  bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
+  bubble.textContent = text;
+
+  wrapper.appendChild(circle);
+  wrapper.appendChild(bubble);
 
   if (sender === "bot") {
-    wrapper.className = "bot-bubble-wrapper";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble-bot";
-    bubble.textContent = text;
-
-    const button = document.createElement("img");
-    button.src = "assets/listen-button.svg";
-    button.className = "listen-button";
-    button.alt = "Озвучить";
-    button.onclick = speakLast;
-
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(button);
-  } else {
-    wrapper.className = "message user";
-    wrapper.textContent = text;
+    const listenBtn = document.createElement("img");
+    listenBtn.src = "assets/listen-button.svg";
+    listenBtn.className = "listen-button";
+    listenBtn.onclick = speakLast;
+    wrapper.appendChild(listenBtn);
   }
 
   chat.appendChild(wrapper);
   chat.scrollTop = chat.scrollHeight;
 }
 
+// Скрепка
 fileInput.addEventListener("change", () => {
   selectedFile = fileInput.files[0];
   if (selectedFile) {
@@ -44,6 +45,7 @@ fileInput.addEventListener("change", () => {
   }
 });
 
+// Камера
 function openCamera() {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
@@ -51,9 +53,7 @@ function openCamera() {
       video.srcObject = stream;
       cameraPreview.style.display = "block";
     })
-    .catch(() => {
-      appendMessage("🚫 Нет доступа к камере", "bot");
-    });
+    .catch(() => appendMessage("🚫 Нет доступа к камере", "bot"));
 }
 
 function closeCamera() {
@@ -77,12 +77,12 @@ function takePhoto() {
   }, "image/jpeg", 0.95);
 }
 
+// Отправка
 async function send() {
   if (isSending) return;
   isSending = true;
 
   const text = textInput.value.trim();
-
   if (text) {
     appendMessage(text, "user");
     textInput.value = "";
@@ -93,19 +93,16 @@ async function send() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
       });
-
       const data = await res.json();
       lastBotReply = data.reply?.trim() || "🤖 Егорыч молчит...";
       appendMessage(lastBotReply, "bot");
-
-    } catch (err) {
+    } catch {
       appendMessage("❌ Ошибка ответа от Егорыча", "bot");
     }
   }
 
   if (selectedFile) {
     appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
-
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -114,24 +111,20 @@ async function send() {
         method: "POST",
         body: formData
       });
-
       const data = await res.json();
-
       if (data.base64) {
         const visionRes = await fetch("https://egorych-backend-production.up.railway.app/vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ base64: data.base64 })
         });
-
         const visionData = await visionRes.json();
         lastBotReply = visionData.reply?.trim() || "🤖 Егорыч посмотрел, но ничего не понял.";
         appendMessage(lastBotReply, "bot");
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
-
-    } catch (err) {
+    } catch {
       appendMessage("❌ Ошибка при загрузке", "bot");
     }
 
@@ -157,7 +150,7 @@ async function speakLast() {
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     audio.play();
-  } catch (err) {
+  } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
