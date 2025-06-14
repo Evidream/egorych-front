@@ -8,28 +8,29 @@
 </head>
 <body>
 
-  <!-- Bot bubble -->
-  <div class="bubble-wrapper">
-    <div class="bot-circle"></div>
-    <div class="bubble-bot">Привет! Я Егорыч. Чем могу помочь?</div>
-    <img class="listen-button" src="assets/listen-button.svg" alt="Слушать"/>
-  </div>
+  <!-- ЧАТ -->
+  <div id="chat"></div>
 
-  <!-- User bubble -->
-  <div class="user-wrapper">
-    <div class="bubble-user">Что на душе?</div>
-    <div class="user-circle"></div>
-  </div>
-
-  <!-- Input -->
-  <div class="input-container">
-    <input type="text" placeholder="Напиши что-то..." />
-    <img class="icon-clip" src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
-    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера"/>
-    <div class="send-button">
-      <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
+  <!-- Поле предпросмотра камеры -->
+  <div id="cameraPreview">
+    <video id="video" autoplay playsinline></video>
+    <div class="camera-buttons">
+      <button onclick="takePhoto()">📸</button>
+      <button onclick="closeCamera()">❌</button>
     </div>
   </div>
 
+  <!-- Поле ввода и кнопки -->
+  <div class="input-container">
+    <input type="text" id="textInput" placeholder="Напиши что-то..." />
+    <label for="fileInput" class="icon-clip"></label>
+    <input type="file" id="fileInput" />
+    <button class="icon-camera" onclick="openCamera()"></button>
+    <button class="send-button" id="sendBtn">
+      <img class="send-icon" src="assets/send-button.svg" alt="Отправить">
+    </button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
