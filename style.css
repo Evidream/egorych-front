@@ -1,90 +1,73 @@
-/* === Основные настройки === */
+/* === Основные === */
 body {
-  background-color: #4544A5;
+  background: #4544A5;
   margin: 0;
   padding: 40px;
   font-family: 'Pragmatica', sans-serif;
 }
 
-/* === Обертка бота === */
-.bubble-wrapper {
+/* === Обёртки === */
+.bubble-wrapper, .user-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
   margin-bottom: 35px;
+}
+
+.bot-circle, .user-circle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
 }
 
 .bot-circle {
-  width: 15.434px;
-  height: 15.434px;
-  border-radius: 50%;
-  background: #FFFFFF;
-}
-
-.bubble-bot {
-  width: 767px;
-  height: 83px;
-  border-radius: 300px;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  font-size: 20px;
-  color: #303030;
-  font-weight: 500;
-  letter-spacing: -0.4px;
-}
-
-.listen-button {
-  width: 80px;
-  height: 80px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.listen-button:hover {
-  transform: scale(1.05);
-}
-
-/* === Обертка пользователя === */
-.user-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-bottom: 35px;
-}
-
-.bubble-user {
-  width: 155px;
-  height: 80px;
-  border-radius: 300px;
-  background: #1F1F1F;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 30px;
-  font-size: 20px;
-  color: #FFFFFF;
-  font-weight: 500;
-  letter-spacing: -0.4px;
+  background: #FFF;
+  margin-right: 10px;
 }
 
 .user-circle {
-  width: 15.434px;
-  height: 15.434px;
-  border-radius: 50%;
   background: #1F1F1F;
+  margin-left: 10px;
 }
 
-/* === Инпут и кнопки === */
+/* === Баблы === */
+.bubble-bot {
+  width: auto;
+  max-width: 767px;
+  padding: 20px 40px;
+  border-radius: 300px;
+  background: #FFF;
+  color: #303030;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.bubble-user {
+  width: auto;
+  max-width: 155px;
+  padding: 20px 40px;
+  border-radius: 300px;
+  background: #1F1F1F;
+  color: #FFF;
+  font-size: 20px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* === Listen === */
+.listen-button {
+  width: 80px;
+  height: 80px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* === Инпут === */
 .input-container {
   display: flex;
   align-items: center;
-  padding: 4px 4px 4px 40px;
-  background: #FFFFFF;
-  border-radius: 300px;
-  max-width: 100%;
+  background: #FFF;
+  border-radius: 50px;
+  padding: 20px 30px;
 }
 
 .input-container input[type="text"] {
@@ -92,20 +75,12 @@ body {
   border: none;
   outline: none;
   font-size: 20px;
-  font-family: 'Pragmatica', sans-serif;
-  padding: 20px 0;
+  margin-right: 15px;
 }
 
-.icon-clip {
+.icon-clip, .icon-camera {
   width: 36px;
   height: 36px;
-  margin: 0 15px;
-  cursor: pointer;
-}
-
-.icon-camera {
-  width: 32.583px;
-  height: 32.583px;
   margin-right: 15px;
   cursor: pointer;
 }
@@ -123,44 +98,71 @@ body {
 }
 
 .send-icon {
-  width: 28.846px;
-  height: 28.846px;
+  width: 28px;
+  height: 28px;
 }
 
-/* === Мобильная адаптация === */
+/* === Камера предпросмотр === */
+#cameraPreview {
+  display: none;
+  position: relative;
+  width: 324px;
+  height: 576px;
+  background: #000;
+  border: 7px solid rgba(255, 255, 255, 0.3);
+  border-radius: 34px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+#cameraPreview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-buttons {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.camera-buttons button {
+  width: 150px;
+  height: 80px;
+  border: none;
+  border-radius: 40px;
+  background: #202020;
+  cursor: pointer;
+}
+
+.camera-buttons button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* === Медиа для мобилки === */
 @media (max-width: 768px) {
-  body {
-    padding: 20px;
-  }
-
-  .bubble-wrapper, .user-wrapper {
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-
-  .bubble-bot {
-    width: auto;
-    height: auto;
-    padding: 20px;
+  .bubble-bot, .bubble-user {
     font-size: 18px;
+    padding: 16px 30px;
   }
 
-  .bubble-user {
-    width: auto;
-    height: auto;
-    padding: 20px;
-    font-size: 18px;
+  .listen-button {
+    width: 60px;
+    height: 60px;
   }
 
   .input-container {
-    padding: 3px 3px 3px 20px;
+    padding: 16px 20px;
   }
 
-  .icon-clip {
-    margin: 0 10px;
-  }
-
-  .icon-camera {
+  .icon-clip, .icon-camera {
+    width: 30px;
+    height: 30px;
     margin-right: 10px;
   }
 
@@ -173,5 +175,15 @@ body {
   .send-icon {
     width: 24px;
     height: 24px;
+  }
+
+  #cameraPreview {
+    width: 260px;
+    height: 460px;
+  }
+
+  .camera-buttons button {
+    width: 120px;
+    height: 60px;
   }
 }
