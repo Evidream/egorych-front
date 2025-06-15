@@ -1,16 +1,12 @@
 const chat = document.getElementById("chat");
-const textInput = document.getElementById("textInput");
-const sendBtn = document.getElementById("sendBtn");
+const textInput = document.querySelector(".input-container input");
+const sendBtn = document.querySelector(".send-button");
 const clipBtn = document.querySelector(".icon-clip");
 const cameraBtn = document.querySelector(".icon-camera");
 
 let selectedFile = null;
 let mediaStream = null;
-let lastBotReply = "";
 let isSending = false;
-
-// AUTO: стартовое приветствие
-appendMessage("Привет! Я Егорыч. Чем могу помочь?", "bot");
 
 // ENTER отправка
 textInput.addEventListener("keydown", (e) => {
@@ -35,41 +31,44 @@ clipBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
-cameraBtn.addEventListener("click", openCamera);
-sendBtn.addEventListener("click", send);
-
-function openCamera() {
+cameraBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       mediaStream = stream;
-      const video = document.getElementById("video");
+      const video = document.createElement("video");
       video.srcObject = stream;
-      document.getElementById("cameraPreview").style.display = "block";
+      video.autoplay = true;
+      video.playsInline = true;
+      document.body.appendChild(video);
+
+      const snapBtn = document.createElement("button");
+      snapBtn.innerText = "📸";
+      document.body.appendChild(snapBtn);
+
+      snapBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+          selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+          appendMessage("📸 Снимок готов", "user");
+          stopCamera(video, snapBtn);
+        }, "image/jpeg");
+      });
     })
     .catch(() => {
       appendMessage("🚫 Нет доступа к камере", "bot");
     });
-}
+});
 
-function takePhoto() {
-  const video = document.getElementById("video");
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video, 0, 0);
-  canvas.toBlob(blob => {
-    selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
-    appendMessage("📸 Снимок готов", "user");
-    closeCamera();
-  }, "image/jpeg");
-}
-
-function closeCamera() {
+function stopCamera(video, snapBtn) {
   if (mediaStream) {
     mediaStream.getTracks().forEach(track => track.stop());
     mediaStream = null;
   }
-  document.getElementById("cameraPreview").style.display = "none";
+  video.remove();
+  snapBtn.remove();
 }
 
 function appendMessage(text, sender) {
@@ -88,13 +87,14 @@ function appendMessage(text, sender) {
     listenBtn.src = "assets/listen-button.svg";
     listenBtn.alt = "Слушать";
     listenBtn.className = "listen-button";
-    listenBtn.onclick = speakLast;
+
+    // Передаём именно этот текст в функцию speak!
+    listenBtn.onclick = () => speak(text);
 
     wrapper.appendChild(circle);
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
-    lastBotReply = text;
   } else {
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
@@ -167,8 +167,10 @@ async function send() {
   isSending = false;
 }
 
-async function speakLast() {
-  if (!lastBotReply) {
+sendBtn.addEventListener("click", send);
+
+async function speak(text) {
+  if (!text) {
     appendMessage("❌ Нет текста для озвучки", "bot");
     return;
   }
@@ -177,7 +179,7 @@ async function speakLast() {
     const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: lastBotReply })
+      body: JSON.stringify({ text })
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
