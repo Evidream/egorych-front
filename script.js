@@ -1,6 +1,6 @@
 const chat = document.getElementById("chat");
-const textInput = document.querySelector(".input-container input");
-const sendBtn = document.querySelector(".send-button");
+const textInput = document.getElementById("textInput");
+const sendBtn = document.getElementById("sendBtn");
 const clipBtn = document.querySelector(".icon-clip");
 const cameraBtn = document.querySelector(".icon-camera");
 
@@ -9,7 +9,10 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-// === ENTER отправка ===
+// AUTO: стартовое приветствие
+appendMessage("Привет! Я Егорыч. Чем могу помочь?", "bot");
+
+// ENTER отправка
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -17,7 +20,6 @@ textInput.addEventListener("keydown", (e) => {
   }
 });
 
-// === КЛИП ===
 clipBtn.addEventListener("click", () => {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
@@ -33,48 +35,43 @@ clipBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
-// === КАМЕРА ===
-cameraBtn.addEventListener("click", () => {
+cameraBtn.addEventListener("click", openCamera);
+sendBtn.addEventListener("click", send);
+
+function openCamera() {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       mediaStream = stream;
-      const video = document.createElement("video");
+      const video = document.getElementById("video");
       video.srcObject = stream;
-      video.autoplay = true;
-      video.playsInline = true;
-      document.body.appendChild(video);
-
-      const snapBtn = document.createElement("button");
-      snapBtn.innerText = "📸";
-      document.body.appendChild(snapBtn);
-
-      snapBtn.addEventListener("click", () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-        canvas.toBlob(blob => {
-          selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
-          appendMessage("📸 Снимок готов", "user");
-          stopCamera(video, snapBtn);
-        }, "image/jpeg");
-      });
+      document.getElementById("cameraPreview").style.display = "block";
     })
     .catch(() => {
       appendMessage("🚫 Нет доступа к камере", "bot");
     });
-});
+}
 
-function stopCamera(video, snapBtn) {
+function takePhoto() {
+  const video = document.getElementById("video");
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+    selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+    appendMessage("📸 Снимок готов", "user");
+    closeCamera();
+  }, "image/jpeg");
+}
+
+function closeCamera() {
   if (mediaStream) {
     mediaStream.getTracks().forEach(track => track.stop());
     mediaStream = null;
   }
-  video.remove();
-  snapBtn.remove();
+  document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === ДОБАВЛЕНИЕ СООБЩЕНИЙ ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
@@ -97,9 +94,7 @@ function appendMessage(text, sender) {
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
-    lastBotReply = text; // ⬅️ ВСЁГДА обновляем!
-    console.log("✅ [appendMessage] lastBotReply =", lastBotReply);
-
+    lastBotReply = text;
   } else {
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
@@ -116,7 +111,6 @@ function appendMessage(text, sender) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// === ОТПРАВКА ===
 async function send() {
   if (isSending) return;
   isSending = true;
@@ -173,12 +167,7 @@ async function send() {
   isSending = false;
 }
 
-sendBtn.addEventListener("click", send);
-
-// === ОЗВУЧКА ===
 async function speakLast() {
-  console.log("👉 [speakLast] lastBotReply =", lastBotReply);
-
   if (!lastBotReply) {
     appendMessage("❌ Нет текста для озвучки", "bot");
     return;
@@ -188,13 +177,12 @@ async function speakLast() {
     const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: lastBotReply }) // ✅ ВАЖНО: всегда text!
+      body: JSON.stringify({ text: lastBotReply })
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
     audio.play();
-  } catch (err) {
-    console.error("❌ Ошибка speak:", err);
+  } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
