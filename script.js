@@ -9,7 +9,7 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-// ENTER отправка
+// === ENTER отправка ===
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -17,6 +17,7 @@ textInput.addEventListener("keydown", (e) => {
   }
 });
 
+// === КЛИП ===
 clipBtn.addEventListener("click", () => {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
@@ -32,6 +33,7 @@ clipBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
+// === КАМЕРА ===
 cameraBtn.addEventListener("click", () => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
@@ -72,6 +74,7 @@ function stopCamera(video, snapBtn) {
   snapBtn.remove();
 }
 
+// === ДОБАВЛЕНИЕ СООБЩЕНИЙ ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
@@ -94,7 +97,9 @@ function appendMessage(text, sender) {
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
-    lastBotReply = text; // <-- Ключ: обновляем всегда!
+    lastBotReply = text; // ⬅️ ВСЁГДА обновляем!
+    console.log("✅ [appendMessage] lastBotReply =", lastBotReply);
+
   } else {
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
@@ -111,6 +116,7 @@ function appendMessage(text, sender) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+// === ОТПРАВКА ===
 async function send() {
   if (isSending) return;
   isSending = true;
@@ -169,7 +175,10 @@ async function send() {
 
 sendBtn.addEventListener("click", send);
 
+// === ОЗВУЧКА ===
 async function speakLast() {
+  console.log("👉 [speakLast] lastBotReply =", lastBotReply);
+
   if (!lastBotReply) {
     appendMessage("❌ Нет текста для озвучки", "bot");
     return;
@@ -179,12 +188,13 @@ async function speakLast() {
     const res = await fetch("https://egorych-backend-production.up.railway.app/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: lastBotReply }) // ВАЖНО: ключ 'text'
+      body: JSON.stringify({ text: lastBotReply }) // ✅ ВАЖНО: всегда text!
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
     audio.play();
-  } catch {
+  } catch (err) {
+    console.error("❌ Ошибка speak:", err);
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
