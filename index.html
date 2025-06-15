@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- Bot bubble -->
+  <!-- Чат -->
   <div id="chat" class="chat-container">
     <div class="bubble-wrapper">
       <div class="bot-circle"></div>
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <!-- Camera preview -->
+  <!-- Камера -->
   <div id="cameraPreview" class="camera-preview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
@@ -26,15 +26,15 @@
     </div>
   </div>
 
-  <!-- Input -->
+  <!-- Инпут -->
   <div class="input-container">
-    <input id="textInput" type="text" placeholder="Что на душе?" />
-    <label for="fileInput" class="icon-clip">
+    <input type="text" placeholder="Что на душе?" />
+    <label class="icon-clip">
       <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
     </label>
     <input id="fileInput" type="file" style="display:none"/>
-    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
-    <div id="sendBtn" class="send-button" onclick="send()">
+    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера"/>
+    <div class="send-button">
       <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
     </div>
   </div>
