@@ -116,10 +116,11 @@ function appendMessage(text, sender) {
     wrapper.appendChild(circle);
   }
 
-  wrapper.style.opacity = "0";
   chat.appendChild(wrapper);
+
+  // ✅ Добавляем fade-появление
   setTimeout(() => {
-    wrapper.style.opacity = "1";
+    wrapper.classList.add("show");
   }, 50);
 
   chat.scrollTop = chat.scrollHeight;
