@@ -3,17 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Egorych Chat</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>Егорыч</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container" id="chat"></div>
 
+  <!-- Контейнер чата -->
+  <div id="chat" class="chat-container">
+    <!-- Приветственный бабл рендерится скриптом -->
+  </div>
+
+  <!-- Камера -->
+  <div id="cameraPreview" class="camera-preview">
+    <video id="video" autoplay playsinline></video>
+    <div class="camera-buttons">
+      <button class="camera-btn" onclick="takePhoto()">📸</button>
+      <button class="camera-btn" onclick="closeCamera()">❌</button>
+    </div>
+  </div>
+
+  <!-- Ввод -->
   <div class="input-container">
-    <input type="text" id="userInput" placeholder="Напиши Егорычу..." />
-    <button id="sendBtn">➤</button>
+    <input id="textInput" type="text" placeholder="Что на душе?" />
+    <label for="fileInput" class="icon-clip">
+      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
+    </label>
+    <input id="fileInput" type="file" style="display:none"/>
+    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
+    <div id="sendBtn" class="send-button">
+      <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
+    </div>
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Запускаем приветствие при загрузке страницы
+    window.addEventListener('DOMContentLoaded', () => {
+      addBotMessage('Привет, роднуля! Как дела? Напиши что-нибудь 👇');
+    });
+  </script>
 </body>
 </html>
