@@ -117,7 +117,8 @@ body {
   align-items: center;
   background: #FFF;
   border-radius: 300px;
-  padding: 20px 30px;
+  height: 83px;
+  padding: 0 30px;
   position: fixed;
   bottom: 20px;
   left: 50%;
