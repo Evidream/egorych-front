@@ -7,6 +7,22 @@ body {
   overflow-x: hidden;
 }
 
+/* ✅ Новый враппер для скролла */
+.chat-wrapper {
+  position: fixed;
+  top: 40px; /* отступ сверху — как padding у body */
+  left: 40px;
+  right: 40px;
+  bottom: 120px; /* под input-container + запас */
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: none; /* Firefox */
+}
+
+.chat-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* === Обёртки === */
 .bubble-wrapper, .user-wrapper {
   display: flex;
@@ -169,6 +185,13 @@ body {
   .listen-button {
     width: 60px;
     height: 60px;
+  }
+
+  .chat-wrapper {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 100px;
   }
 
   .input-container {
