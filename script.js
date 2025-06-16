@@ -90,9 +90,24 @@ function appendMessage(text, sender) {
 
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
-    bubble.style.minWidth = "200px"; // 👉 фикс ширины минимальной
-    bubble.style.maxWidth = "767px"; // 👉 максимум ширины
-    bubble.textContent = ""; // пусто для набора текста
+
+    // === Хитрый фикс ширины перед печатью ===
+    const measure = document.createElement("span");
+    measure.style.visibility = "hidden";
+    measure.style.position = "absolute";
+    measure.style.whiteSpace = "pre-wrap";
+    measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
+    measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
+    measure.style.maxWidth = "767px";
+    measure.textContent = text;
+    document.body.appendChild(measure);
+
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
+    bubble.style.width = measuredWidth + "px";
+
+    document.body.removeChild(measure);
+
+    bubble.textContent = "";
 
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
@@ -106,12 +121,12 @@ function appendMessage(text, sender) {
 
     chat.appendChild(wrapper);
 
-    // Добавляем класс show для плавности
+    // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
 
-    // ✅ теперь печатаем
+    // Печатать по буквам
     typeText(bubble, text);
     lastBotReply = text;
 
@@ -132,7 +147,7 @@ function appendMessage(text, sender) {
     }, 50);
   }
 
-  // ✅ Прокрутка — всегда враппер!
+  // ✅ Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
