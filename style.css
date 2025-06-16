@@ -7,27 +7,28 @@ body {
   overflow-x: hidden;
 }
 
-/* ✅ Новый враппер для скролла */
+/* ✅ Враппер для скролла */
 .chat-wrapper {
   position: fixed;
-  top: 40px; /* отступ сверху — как padding у body */
+  top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 120px; /* под input-container + запас */
+  bottom: 120px; /* инпут и запас */
   overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse; /* 💡 важное: теперь чат скроллится как ChatGPT! */
   box-sizing: border-box;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
-
 .chat-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
-/* === Контейнер чата внутри враппера === */
+/* === Контейнер чата === */
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* баблы снизу растут вверх */
+  justify-content: flex-start; /* растём от верха */
   min-height: 100%;
 }
 
@@ -44,7 +45,7 @@ body {
 
 .bubble-wrapper.show, .user-wrapper.show {
   opacity: 1;
-  max-height: 1000px; /* достаточно большое для анимации раскрытия */
+  max-height: 1000px;
 }
 
 .bot-circle, .user-circle {
@@ -69,7 +70,7 @@ body {
 .bubble-bot {
   display: inline-block;
   width: fit-content; /* фикс ширины по контенту */
-  max-width: 767px;   /* ограничение в длину */
+  max-width: 767px;   
   padding: 20px 40px;
   border-radius: 40px;
   background: #FFF;
@@ -113,7 +114,7 @@ body {
   background: #FFF;
   border-radius: 50px;
   padding: 20px 30px;
-  position: fixed; /* фиксируем внизу экрана */
+  position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
