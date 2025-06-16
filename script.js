@@ -1,51 +1,207 @@
 const chat = document.getElementById("chat");
-const input = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
+const textInput = document.querySelector(".input-container input");
+const sendBtn = document.querySelector(".send-button");
+const clipBtn = document.querySelector(".icon-clip");
+const cameraBtn = document.querySelector(".icon-camera");
 
-// === Авто-приветственный бабл при загрузке ===
-window.onload = () => {
-  botReply("Привет, роднуля! 🫶 Напиши, как ты?");
-};
+let selectedFile = null;
+let mediaStream = null;
+let lastBotReply = "";
+let isSending = false;
 
-// === При нажатии кнопки отправки ===
-sendBtn.onclick = sendMessage;
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
+const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
+
+// === Приветственный бабл ===
+window.addEventListener("DOMContentLoaded", () => {
+  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
 });
 
-// === Отправка сообщения ===
-function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
-  addBubble(text, "user");
-  input.value = "";
+textInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    send();
+  }
+});
 
-  // Симуляция печати ответа
-  setTimeout(() => {
-    typeReply("Ого! Ща расскажу всё по красоте 😉");
-  }, 800);
+clipBtn.addEventListener("click", () => {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.style.display = "none";
+  document.body.appendChild(fileInput);
+
+  fileInput.addEventListener("change", () => {
+    selectedFile = fileInput.files[0];
+    appendMessage(`📎 Готов к отправке: ${selectedFile.name}`, "user");
+    document.body.removeChild(fileInput);
+  });
+
+  fileInput.click();
+});
+
+cameraBtn.addEventListener("click", () => {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      mediaStream = stream;
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      document.body.appendChild(video);
+
+      const snapBtn = document.createElement("button");
+      snapBtn.innerText = "📸";
+      document.body.appendChild(snapBtn);
+
+      snapBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+          selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+          appendMessage("📸 Снимок готов", "user");
+          stopCamera(video, snapBtn);
+        }, "image/jpeg");
+      });
+    })
+    .catch(() => {
+      appendMessage("🚫 Нет доступа к камере", "bot");
+    });
+});
+
+function stopCamera(video, snapBtn) {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
+  }
+  video.remove();
+  snapBtn.remove();
 }
 
-// === Добавить пузырь ===
-function addBubble(text, type) {
-  const bubble = document.createElement("div");
-  bubble.className = `bubble ${type}`;
-  bubble.textContent = text;
-  chat.appendChild(bubble);
+// === Добавление баблов ===
+function appendMessage(text, sender) {
+  const wrapper = document.createElement("div");
+  wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
+
+  if (sender === "bot") {
+    const circle = document.createElement("div");
+    circle.className = "bot-circle";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
+    bubble.textContent = ""; // пусто, для эффекта печати
+
+    const listenBtn = document.createElement("img");
+    listenBtn.src = "assets/listen-button.svg";
+    listenBtn.alt = "Слушать";
+    listenBtn.className = "listen-button";
+    listenBtn.onclick = () => speak(text);
+
+    wrapper.appendChild(circle);
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
+
+    typeText(bubble, text); // печатать по буквам
+    lastBotReply = text;
+
+  } else {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-user";
+    bubble.textContent = text;
+
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
+  }
+
+  wrapper.style.opacity = "0";
+  chat.appendChild(wrapper);
+  setTimeout(() => {
+    wrapper.style.opacity = "1";
+  }, 50);
+
   chat.scrollTop = chat.scrollHeight;
 }
 
-// === Появление бот-ответа с эффектом печати ===
-function typeReply(text) {
-  const bubble = document.createElement("div");
-  bubble.className = "bubble bot";
-  chat.appendChild(bubble);
+// === Печать по буквам ===
+function typeText(element, text, i = 0) {
+  if (i < text.length) {
+    element.textContent += text.charAt(i);
+    setTimeout(() => typeText(element, text, i + 1), 20);
+  }
+}
 
-  let i = 0;
-  const typer = setInterval(() => {
-    bubble.textContent = text.slice(0, i + 1);
-    i++;
-    if (i >= text.length) clearInterval(typer);
-    chat.scrollTop = chat.scrollHeight;
-  }, 30);
+async function send() {
+  if (isSending) return;
+  isSending = true;
+
+  const text = textInput.value.trim();
+  if (text) {
+    appendMessage(text, "user");
+    textInput.value = "";
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
+    } catch {
+      appendMessage("❌ Ошибка ответа", "bot");
+    }
+  }
+
+  if (selectedFile) {
+    appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/upload`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.base64) {
+        const visionRes = await fetch(`${BACKEND_URL}/vision`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ base64: data.base64 })
+        });
+        const visionData = await visionRes.json();
+        appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
+      } else {
+        appendMessage("❌ Ошибка загрузки файла", "bot");
+      }
+    } catch {
+      appendMessage("❌ Ошибка при загрузке", "bot");
+    }
+
+    selectedFile = null;
+  }
+
+  isSending = false;
+}
+
+sendBtn.addEventListener("click", send);
+
+async function speak(text) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/speak`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    const audioData = await res.arrayBuffer();
+    const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
+    audio.play();
+  } catch {
+    appendMessage("❌ Ошибка озвучки", "bot");
+  }
 }
