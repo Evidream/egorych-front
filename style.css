@@ -23,23 +23,36 @@ body {
   display: none; /* Chrome, Safari */
 }
 
+/* === Контейнер чата внутри враппера === */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* чтобы баблы росли вверх, input не загораживает */
+  min-height: 100%;
+}
+
 /* === Обёртки === */
 .bubble-wrapper, .user-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 35px;
   opacity: 0;
-  transition: opacity 0.5s ease; /* Плавное появление */
+  transition: opacity 0.5s ease, max-height 0.5s ease;
+  max-height: 0;
+  overflow: hidden;
 }
 
 .bubble-wrapper.show, .user-wrapper.show {
   opacity: 1;
+  max-height: 1000px; /* достаточно большое для любого текста */
 }
 
 .bot-circle, .user-circle {
+  flex-shrink: 0;
   width: 15px;
   height: 15px;
   border-radius: 50%;
+  margin-top: 10px;
 }
 
 .bot-circle {
@@ -54,28 +67,32 @@ body {
 
 /* === Баблы === */
 .bubble-bot {
+  display: inline-block;
   width: auto;
   max-width: 767px;
   padding: 20px 40px;
-  border-radius: 300px;
+  border-radius: 40px;
   background: #FFF;
   color: #303030;
   font-size: 20px;
   font-weight: 500;
-  transition: all 0.3s ease; /* Плавность на всякий случай */
+  word-wrap: break-word;
+  box-sizing: border-box;
 }
 
 .bubble-user {
+  display: inline-block;
   width: auto;
   max-width: 155px;
   padding: 20px 40px;
-  border-radius: 300px;
+  border-radius: 40px;
   background: #1F1F1F;
   color: #FFF;
   font-size: 20px;
   font-weight: 500;
   margin-left: auto;
-  transition: all 0.3s ease;
+  word-wrap: break-word;
+  box-sizing: border-box;
 }
 
 /* === Listen === */
@@ -84,6 +101,7 @@ body {
   height: 80px;
   margin-left: 10px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* === Инпут === */
