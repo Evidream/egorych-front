@@ -155,6 +155,8 @@ function appendMessage(text, sender) {
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
+    // ✅ Дополнительно обновляем прокрутку во время печати
+    chatWrapper.scrollTop = chatWrapper.scrollHeight;
     setTimeout(() => typeText(element, text, i + 1), 20);
   }
 }
@@ -226,6 +228,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
+    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
