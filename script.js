@@ -1,4 +1,5 @@
 const chat = document.getElementById("chat");
+const chatWrapper = document.getElementById("chat-wrapper");
 const textInput = document.querySelector(".input-container input");
 const sendBtn = document.querySelector(".send-button");
 const clipBtn = document.querySelector(".icon-clip");
@@ -89,7 +90,7 @@ function appendMessage(text, sender) {
 
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
-    bubble.textContent = ""; // пусто, для эффекта печати
+    bubble.textContent = ""; // пусто для эффекта печати
 
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
@@ -101,7 +102,12 @@ function appendMessage(text, sender) {
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
-    typeText(bubble, text); // печатать по буквам
+    chat.appendChild(wrapper);
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
+
+    typeText(bubble, text);
     lastBotReply = text;
 
   } else {
@@ -114,16 +120,15 @@ function appendMessage(text, sender) {
 
     wrapper.appendChild(bubble);
     wrapper.appendChild(circle);
+
+    chat.appendChild(wrapper);
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
   }
 
-  chat.appendChild(wrapper);
-
-  // ✅ Добавляем fade-появление
-  setTimeout(() => {
-    wrapper.classList.add("show");
-  }, 50);
-
-  chat.scrollTop = chat.scrollHeight;
+  // ✅ Прокручиваем только враппер (фикс)
+  chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
 // === Печать по буквам ===
