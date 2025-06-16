@@ -86,7 +86,7 @@ body {
 .bubble-user {
   display: inline-block;
   min-width: 50px;
-  max-width: 155px;
+  max-width: 767px;
   width: fit-content;
   padding: 20px 40px;
   border-radius: 40px;
