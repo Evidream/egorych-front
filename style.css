@@ -42,15 +42,14 @@ body {
   align-items: flex-start;
   margin-bottom: 35px;
   opacity: 0;
-  transition: opacity 0.7s ease, max-height 0.5s ease;
-  max-height: 0;
-  overflow: visible;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.5s ease;
 }
 
 .bubble-wrapper.show,
 .user-wrapper.show {
   opacity: 1;
-  max-height: 1000px;
+  transform: translateY(0);
 }
 
 /* === БАБЛЫ С ХВОСТИКОМ === */
