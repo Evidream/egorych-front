@@ -86,6 +86,7 @@ function appendMessage(text, sender) {
 
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
+    bubble.textContent = ""; // сначала пустой
 
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
@@ -93,7 +94,7 @@ function appendMessage(text, sender) {
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
-    // сначала только кружок
+    // сначала кружок
     wrapper.appendChild(circle);
     chat.appendChild(wrapper);
 
@@ -102,16 +103,20 @@ function appendMessage(text, sender) {
       wrapper.classList.add("show");
     }, 50);
 
-    // через паузу вставляем бабл и кнопку
+    // потом вставляем бабл и кнопку — уже со стилем показа!
     setTimeout(() => {
       wrapper.appendChild(bubble);
       wrapper.appendChild(listenBtn);
+
+      // важный момент — бабл появится, а текст внутри будет печататься
       typeText(bubble, text);
-    }, 350);
+
+    }, 350); // 350мс подождали кружок
 
     lastBotReply = text;
 
   } else {
+    // === для юзера ===
     const circle = document.createElement("div");
     circle.className = "user-circle";
 
