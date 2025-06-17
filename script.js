@@ -75,7 +75,7 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Добавление баблов ===
+// === Добавление баблов по шагам ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
@@ -85,18 +85,18 @@ function appendMessage(text, sender) {
   wrapper.appendChild(circle);
   chat.appendChild(wrapper);
 
-  // Плавное появление кружка
+  // Мягкий фейд кружка
   setTimeout(() => {
     wrapper.classList.add("show");
   }, 50);
 
-  // Через паузу добавляем бабл и слушалку
+  // Через паузу добавляем бабл и слушалку (для бота)
   setTimeout(() => {
     const bubble = document.createElement("div");
     bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
 
     if (sender === "bot") {
-      // === Зафиксировать ширину бабла до печати ===
+      // Фиксируем ширину ДО печати!
       const measure = document.createElement("span");
       measure.style.visibility = "hidden";
       measure.style.position = "absolute";
@@ -109,10 +109,9 @@ function appendMessage(text, sender) {
 
       const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
       bubble.style.width = measuredWidth + "px";
-
       document.body.removeChild(measure);
 
-      bubble.textContent = ""; // для печати по буквам
+      bubble.textContent = "";
     } else {
       bubble.textContent = text;
     }
@@ -128,7 +127,7 @@ function appendMessage(text, sender) {
       wrapper.appendChild(listenBtn);
     }
 
-    // Плавное появление бабла
+    // Плавный фейд бабла
     bubble.classList.add("show");
 
     if (sender === "bot") {
@@ -136,9 +135,11 @@ function appendMessage(text, sender) {
       lastBotReply = text;
     }
 
-  }, 400); // 300ms + запас
+    chatWrapper.scrollTop = chatWrapper.scrollHeight;
 
-  // Обновить скролл
+  }, 400); // пауза 300мс + запас
+
+  // Гарантия скролла
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
