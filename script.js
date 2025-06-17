@@ -81,51 +81,75 @@ function appendMessage(text, sender) {
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
   if (sender === "bot") {
-  const bubble = document.createElement("div");
-  bubble.className = "bubble-bot";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
 
-  // === Хитрый фикс ширины перед печатью ===
-  const measure = document.createElement("span");
-  measure.style.visibility = "hidden";
-  measure.style.position = "absolute";
-  measure.style.whiteSpace = "pre-wrap";
-  measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
-  measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
-  measure.style.maxWidth = "767px";
-  measure.textContent = text;
-  document.body.appendChild(measure);
+    // === Фикс ширины ===
+    const measure = document.createElement("span");
+    measure.style.visibility = "hidden";
+    measure.style.position = "absolute";
+    measure.style.whiteSpace = "pre-wrap";
+    measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
+    measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
+    measure.style.maxWidth = "767px";
+    measure.innerHTML = text;
+    document.body.appendChild(measure);
 
-  const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
-  bubble.style.width = measuredWidth + "px";
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+    bubble.style.width = measuredWidth + "px";
 
-  document.body.removeChild(measure);
+    document.body.removeChild(measure);
 
-  // === Если внутри есть ссылка — вставляем как HTML сразу ===
-  if (text.includes('<a')) {
-    bubble.innerHTML = text;
+    // === Если есть ссылка — сразу HTML, иначе пустой и печатаем ===
+    if (text.includes("<a")) {
+      bubble.innerHTML = text;
+    } else {
+      bubble.textContent = "";
+    }
+
+    const listenBtn = document.createElement("img");
+    listenBtn.src = "assets/listen-button.svg";
+    listenBtn.alt = "Слушать";
+    listenBtn.className = "listen-button";
+    listenBtn.onclick = () => speak(text);
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
+
+    chat.appendChild(wrapper);
+
+    // Плавное появление
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
+
+    // Печатать по буквам только если нет ссылки
+    if (!text.includes("<a")) {
+      typeText(bubble, text);
+    }
+
+    lastBotReply = text;
+
   } else {
-    bubble.textContent = "";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-user";
+    bubble.textContent = text;
+
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
+
+    chat.appendChild(wrapper);
+
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
   }
 
-  const listenBtn = document.createElement("img");
-  listenBtn.src = "assets/listen-button.svg";
-  listenBtn.alt = "Слушать";
-  listenBtn.className = "listen-button";
-  listenBtn.onclick = () => speak(text);
-
-  wrapper.appendChild(bubble);
-  wrapper.appendChild(listenBtn);
-
-  chat.appendChild(wrapper);
-
-  // === Если нет ссылки — печатаем по буквам ===
-  if (!text.includes('<a')) {
-    typeText(bubble, text);
-  }
-
-  lastBotReply = text;
+  chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
-
     // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
