@@ -79,8 +79,9 @@ body {
   height: 15.434px;
   border-radius: 50%;
   background: #FFFFFF;
-  bottom: -10px;
+  bottom: 0;              /* вместо -10px! */
   left: -10px;
+  transform: translateY(50%); /* плавный сдвиг вниз, чтобы не резалось */
 }
 
 /* === ЮЗЕР БАБЛ === */
@@ -110,8 +111,9 @@ body {
   height: 15.434px;
   border-radius: 50%;
   background: #1F1F1F;
-  bottom: -10px;
+  bottom: 0;               /* вместо -10px! */
   right: -10px;
+  transform: translateY(50%);
 }
 
 /* === Listen === */
