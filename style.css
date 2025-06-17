@@ -270,4 +270,33 @@ body {
   .chat-container {
     overflow: visible !important;
   }
+
+  /* Кружок: начальное состояние */
+.bubble-wrapper .bot-circle,
+.user-wrapper .user-circle {
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Кружок: финальное состояние */
+.bubble-wrapper.show .bot-circle,
+.user-wrapper.show .user-circle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Бабл: начальное состояние */
+.bubble-bot,
+.bubble-user {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s ease 0.3s, transform 0.3s ease 0.3s; /* с задержкой после кружка */
+}
+
+/* Бабл: финальное состояние */
+.bubble-wrapper.show .bubble-bot,
+.user-wrapper.show .bubble-user {
+  opacity: 1;
+  transform: scale(1);
 }
