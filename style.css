@@ -31,7 +31,7 @@ body {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: border-box;
-  padding-bottom: 55px; /* ✅ Добавь вот это! */
+  padding-bottom: 55px;
 }
 
 /* === ОБЁРТКИ === */
@@ -55,7 +55,7 @@ body {
 
 /* === БАБЛЫ С ХВОСТИКОМ === */
 .bubble-bot {
-  position: relative; /* теперь хвост внутри бабла */
+  position: relative;
   display: inline-block;
   min-width: 50px;
   max-width: 767px;
@@ -71,7 +71,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Хвостик бота */
 .bubble-bot::before {
   content: "";
   position: absolute;
@@ -79,14 +78,13 @@ body {
   height: 15.434px;
   border-radius: 50%;
   background: #FFFFFF;
-  bottom: 0;              /* вместо -10px! */
+  bottom: 0;
   left: -10px;
-  transform: translateY(50%); /* плавный сдвиг вниз, чтобы не резалось */
+  transform: translateY(50%);
 }
 
-/* === ЮЗЕР БАБЛ === */
 .bubble-user {
-  position: relative; /* хвост внутри бабла */
+  position: relative;
   display: inline-block;
   min-width: 50px;
   max-width: 767px;
@@ -103,7 +101,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Хвостик юзера */
 .bubble-user::after {
   content: "";
   position: absolute;
@@ -111,7 +108,7 @@ body {
   height: 15.434px;
   border-radius: 50%;
   background: #1F1F1F;
-  bottom: 0;               /* вместо -10px! */
+  bottom: 0;
   right: -10px;
   transform: translateY(50%);
 }
@@ -268,8 +265,9 @@ body {
     width: 120px;
     height: 60px;
   }
+
   .chat-wrapper,
-.chat-container {
-  overflow: visible !important;
-}
+  .chat-container {
+    overflow: visible !important;
+  }
 }
