@@ -76,65 +76,47 @@ function closeCamera() {
 }
 
 // === Добавление баблов ===
-// === Добавление баблов по шагам ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
-  if (sender === "bot") {
+  // Кружок
+  const circle = document.createElement("div");
+  circle.className = sender === "bot" ? "bot-circle" : "user-circle";
+  wrapper.appendChild(circle);
+  chat.appendChild(wrapper);
+
+  // Показываем кружок
+  setTimeout(() => {
+    wrapper.classList.add("show");
+  }, 50);
+
+  // Через паузу добавляем бабл (+ кнопку если бот)
+  setTimeout(() => {
     const bubble = document.createElement("div");
-    bubble.className = "bubble-bot";
-    bubble.textContent = "";
+    bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
+    bubble.textContent = sender === "bot" ? "" : text;
 
-    const circle = document.createElement("div");
-    circle.className = "bot-circle";
+    wrapper.appendChild(bubble);
 
-    const listenBtn = document.createElement("img");
-    listenBtn.src = "assets/listen-button.svg";
-    listenBtn.alt = "Слушать";
-    listenBtn.className = "listen-button";
-    listenBtn.onclick = () => speak(text);
-
-    // Сначала только кружок
-    wrapper.appendChild(circle);
-    chat.appendChild(wrapper);
-
-    // Показываем кружок
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
-
-    // Через паузу добавляем бабл и кнопку
-    setTimeout(() => {
-      wrapper.appendChild(bubble);
+    if (sender === "bot") {
+      const listenBtn = document.createElement("img");
+      listenBtn.src = "assets/listen-button.svg";
+      listenBtn.alt = "Слушать";
+      listenBtn.className = "listen-button";
+      listenBtn.onclick = () => speak(text);
       wrapper.appendChild(listenBtn);
-      bubble.classList.add("show");
+
+      // Печатать по буквам
       typeText(bubble, text);
-    }, 400); // 0.3 сек для кружка + запас
+      lastBotReply = text;
+    }
 
-    lastBotReply = text;
+    bubble.classList.add("show");
 
-  } else {
-    const bubble = document.createElement("div");
-    bubble.className = "bubble-user";
-    bubble.textContent = text;
+  }, 400); // 0.3 сек + запас
 
-    const circle = document.createElement("div");
-    circle.className = "user-circle";
-
-    wrapper.appendChild(circle);
-    chat.appendChild(wrapper);
-
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
-
-    setTimeout(() => {
-      wrapper.appendChild(bubble);
-      bubble.classList.add("show");
-    }, 400);
-  }
-
+  // Прокрутка вниз
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
@@ -214,7 +196,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
+    audio.volume = 1.0; // громкость максимум
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
