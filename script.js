@@ -14,7 +14,7 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 // === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
-  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
+  appendMessage("Ну чё ты, как ты, роднуля? Давай рассказывай - всё порешаем!", "bot");
 });
 
 textInput.addEventListener("keydown", (e) => {
