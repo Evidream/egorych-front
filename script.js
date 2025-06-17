@@ -76,17 +76,18 @@ function closeCamera() {
 }
 
 // === Добавление баблов ===
+// === Добавление баблов по шагам ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
   if (sender === "bot") {
-    const circle = document.createElement("div");
-    circle.className = "bot-circle";
-
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
-    bubble.textContent = ""; // сначала пустой
+    bubble.textContent = "";
+
+    const circle = document.createElement("div");
+    circle.className = "bot-circle";
 
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
@@ -94,35 +95,32 @@ function appendMessage(text, sender) {
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
-    // сначала кружок
+    // Сначала только кружок
     wrapper.appendChild(circle);
     chat.appendChild(wrapper);
 
-    // плавное появление кружка
+    // Показываем кружок
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
 
-    // потом вставляем бабл и кнопку — уже со стилем показа!
+    // Через паузу добавляем бабл и кнопку
     setTimeout(() => {
       wrapper.appendChild(bubble);
       wrapper.appendChild(listenBtn);
-
-      // важный момент — бабл появится, а текст внутри будет печататься
+      bubble.classList.add("show");
       typeText(bubble, text);
-
-    }, 350); // 350мс подождали кружок
+    }, 400); // 0.3 сек для кружка + запас
 
     lastBotReply = text;
 
   } else {
-    // === для юзера ===
-    const circle = document.createElement("div");
-    circle.className = "user-circle";
-
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
     bubble.textContent = text;
+
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
 
     wrapper.appendChild(circle);
     chat.appendChild(wrapper);
@@ -133,7 +131,8 @@ function appendMessage(text, sender) {
 
     setTimeout(() => {
       wrapper.appendChild(bubble);
-    }, 350);
+      bubble.classList.add("show");
+    }, 400);
   }
 
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
