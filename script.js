@@ -87,7 +87,7 @@ function appendMessage(text, sender) {
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
-    // === Хитрый фикс ширины перед печатью ===
+    // === Фикс ширины ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -98,7 +98,7 @@ function appendMessage(text, sender) {
     measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
@@ -111,9 +111,9 @@ function appendMessage(text, sender) {
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
-    wrapper.appendChild(circle);   // ✅ кружок
-    wrapper.appendChild(bubble);   // ✅ бабл
-    wrapper.appendChild(listenBtn); // ✅ слушать
+    wrapper.appendChild(circle);
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
 
@@ -122,7 +122,7 @@ function appendMessage(text, sender) {
     lastBotReply = text;
 
   } else {
-    // === Для пользователя аккуратно
+    // ✅ Чистый user-блок
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
     bubble.textContent = text;
@@ -130,13 +130,13 @@ function appendMessage(text, sender) {
     const circle = document.createElement("div");
     circle.className = "user-circle";
 
-    wrapper.appendChild(bubble);  // ✅ бабл
-    wrapper.appendChild(circle);  // ✅ кружок
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
 
     chat.appendChild(wrapper);
   }
 
-  // === Прокрутка вниз — враппер
+  // === Прокрутка вниз
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
