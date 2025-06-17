@@ -80,7 +80,6 @@ function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
-  // === Кружок ===
   const circle = document.createElement("div");
   circle.className = sender === "bot" ? "bot-circle" : "user-circle";
   wrapper.appendChild(circle);
@@ -88,16 +87,16 @@ function appendMessage(text, sender) {
 
   // Плавное появление кружка
   setTimeout(() => {
-    circle.classList.add("show");
+    wrapper.classList.add("show");
   }, 50);
 
-  // === Через паузу — бабл ===
+  // Через паузу добавляем бабл и слушалку
   setTimeout(() => {
     const bubble = document.createElement("div");
     bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
 
     if (sender === "bot") {
-      // === Меряем ширину заранее ===
+      // === Зафиксировать ширину бабла до печати ===
       const measure = document.createElement("span");
       measure.style.visibility = "hidden";
       measure.style.position = "absolute";
@@ -113,7 +112,7 @@ function appendMessage(text, sender) {
 
       document.body.removeChild(measure);
 
-      bubble.textContent = "";
+      bubble.textContent = ""; // для печати по буквам
     } else {
       bubble.textContent = text;
     }
@@ -127,18 +126,19 @@ function appendMessage(text, sender) {
       listenBtn.className = "listen-button";
       listenBtn.onclick = () => speak(text);
       wrapper.appendChild(listenBtn);
+    }
 
+    // Плавное появление бабла
+    bubble.classList.add("show");
+
+    if (sender === "bot") {
       typeText(bubble, text);
       lastBotReply = text;
     }
 
-    // Плавное появление бабла
-    setTimeout(() => {
-      bubble.classList.add("show");
-    }, 50);
+  }, 400); // 300ms + запас
 
-  }, 400); // пауза после кружка
-
+  // Обновить скролл
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
