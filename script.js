@@ -86,12 +86,12 @@ function appendMessage(text, sender) {
   wrapper.appendChild(circle);
   chat.appendChild(wrapper);
 
-  // === Показываем кружок
+  // Плавное появление кружка
   setTimeout(() => {
-    wrapper.classList.add("show");
+    circle.classList.add("show");
   }, 50);
 
-  // === Через паузу добавляем бабл (с готовой шириной!) ===
+  // === Через паузу — бабл ===
   setTimeout(() => {
     const bubble = document.createElement("div");
     bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
@@ -113,7 +113,7 @@ function appendMessage(text, sender) {
 
       document.body.removeChild(measure);
 
-      bubble.textContent = ""; // пустой, для печати позже
+      bubble.textContent = "";
     } else {
       bubble.textContent = text;
     }
@@ -132,7 +132,10 @@ function appendMessage(text, sender) {
       lastBotReply = text;
     }
 
-    bubble.classList.add("show");
+    // Плавное появление бабла
+    setTimeout(() => {
+      bubble.classList.add("show");
+    }, 50);
 
   }, 400); // пауза после кружка
 
