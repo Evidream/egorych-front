@@ -31,7 +31,7 @@ body {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: border-box;
-  padding-bottom: 138px; /* 👈 как у wrapper */
+  padding-bottom: 55px; /* 👈 как у wrapper */
 }
 
 /* === ОБЁРТКИ === */
