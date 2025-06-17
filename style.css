@@ -13,12 +13,11 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 83px; /* инпут и запас */
+  bottom: 103px; /* 83px (input) + 20px запас */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  scrollbar-width: none;
 }
 
 .chat-wrapper::-webkit-scrollbar {
@@ -31,7 +30,7 @@ body {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: border-box;
-  padding-bottom: 55px;
+  padding-bottom: 55px; /* 60-80px — запас под input */
 }
 
 /* === ОБЁРТКИ === */
