@@ -81,9 +81,6 @@ function appendMessage(text, sender) {
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
   if (sender === "bot") {
-    const circle = document.createElement("div");
-    circle.className = "bot-circle";
-
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
@@ -111,7 +108,6 @@ function appendMessage(text, sender) {
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
-    wrapper.appendChild(circle);
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
