@@ -13,11 +13,12 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 103px; /* 83px (input) + 20px запас */
+  bottom: 138px; /* 83 инпут + 55 зазор */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  scrollbar-width: none;
 }
 
 .chat-wrapper::-webkit-scrollbar {
