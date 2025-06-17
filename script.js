@@ -75,71 +75,67 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Добавление баблов по шагам ===
+// === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
-  const circle = document.createElement("div");
-  circle.className = sender === "bot" ? "bot-circle" : "user-circle";
-  wrapper.appendChild(circle);
-  chat.appendChild(wrapper);
-
-  // Мягкий фейд кружка
-  setTimeout(() => {
-    wrapper.classList.add("show");
-  }, 50);
-
-  // Через паузу добавляем бабл и слушалку (для бота)
-  setTimeout(() => {
+  if (sender === "bot") {
     const bubble = document.createElement("div");
-    bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
+    bubble.className = "bubble-bot";
 
-    if (sender === "bot") {
-      // Фиксируем ширину ДО печати!
-      const measure = document.createElement("span");
-      measure.style.visibility = "hidden";
-      measure.style.position = "absolute";
-      measure.style.whiteSpace = "pre-wrap";
-      measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
-      measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
-      measure.style.maxWidth = "767px";
-      measure.textContent = text;
-      document.body.appendChild(measure);
+    // === Хитрый фикс ширины перед печатью ===
+    const measure = document.createElement("span");
+    measure.style.visibility = "hidden";
+    measure.style.position = "absolute";
+    measure.style.whiteSpace = "pre-wrap";
+    measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
+    measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
+    measure.style.maxWidth = "767px";
+    measure.textContent = text;
+    document.body.appendChild(measure);
 
-      const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
-      bubble.style.width = measuredWidth + "px";
-      document.body.removeChild(measure);
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
+    bubble.style.width = measuredWidth + "px";
 
-      bubble.textContent = "";
-    } else {
-      bubble.textContent = text;
-    }
+    document.body.removeChild(measure);
+
+    bubble.textContent = "";
+
+    const listenBtn = document.createElement("img");
+    listenBtn.src = "assets/listen-button.svg";
+    listenBtn.alt = "Слушать";
+    listenBtn.className = "listen-button";
+    listenBtn.onclick = () => speak(text);
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(listenBtn);
+
+    chat.appendChild(wrapper);
+
+    // Плавное появление
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
+
+    // Печатать по буквам
+    typeText(bubble, text);
+    lastBotReply = text;
+
+  } else {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-user";
+    bubble.textContent = text;
 
     wrapper.appendChild(bubble);
 
-    if (sender === "bot") {
-      const listenBtn = document.createElement("img");
-      listenBtn.src = "assets/listen-button.svg";
-      listenBtn.alt = "Слушать";
-      listenBtn.className = "listen-button";
-      listenBtn.onclick = () => speak(text);
-      wrapper.appendChild(listenBtn);
-    }
+    chat.appendChild(wrapper);
+    setTimeout(() => {
+      wrapper.classList.add("show");
+    }, 50);
+  }
 
-    // Плавный фейд бабла
-    bubble.classList.add("show");
-
-    if (sender === "bot") {
-      typeText(bubble, text);
-      lastBotReply = text;
-    }
-
-    chatWrapper.scrollTop = chatWrapper.scrollHeight;
-
-  }, 400); // пауза 300мс + запас
-
-  // Гарантия скролла
+  // ✅ Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
@@ -219,7 +215,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0;
+    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
