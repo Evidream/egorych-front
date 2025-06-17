@@ -112,7 +112,7 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
-    
+
     // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
@@ -127,11 +127,7 @@ function appendMessage(text, sender) {
     bubble.className = "bubble-user";
     bubble.textContent = text;
 
-    const circle = document.createElement("div");
-    circle.className = "user-circle";
-
     wrapper.appendChild(bubble);
-    wrapper.appendChild(circle);
 
     chat.appendChild(wrapper);
     setTimeout(() => {
@@ -147,7 +143,6 @@ function appendMessage(text, sender) {
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
-    // ✅ Дополнительно обновляем прокрутку во время печати
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
     setTimeout(() => typeText(element, text, i + 1), 20);
   }
