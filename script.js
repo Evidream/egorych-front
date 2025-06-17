@@ -14,7 +14,7 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 // === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
-  appendMessage("Ну чё ты, как ты, роднуля? Давай колись — всё порешаем!", "bot");
+  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
 });
 
 textInput.addEventListener("keydown", (e) => {
@@ -84,7 +84,7 @@ function appendMessage(text, sender) {
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
-    // === Фикс ширины ===
+    // === Хитрый фикс ширины перед печатью ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -92,20 +92,15 @@ function appendMessage(text, sender) {
     measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
     measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
     measure.style.maxWidth = "767px";
-    measure.innerHTML = text;
+    measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
 
-    // === Если есть ссылка — сразу HTML, иначе пустой и печатаем ===
-    if (text.includes("<a")) {
-      bubble.innerHTML = text;
-    } else {
-      bubble.textContent = "";
-    }
+    bubble.textContent = "";
 
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
@@ -118,38 +113,6 @@ function appendMessage(text, sender) {
 
     chat.appendChild(wrapper);
 
-    // Плавное появление
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
-
-    // Печатать по буквам только если нет ссылки
-    if (!text.includes("<a")) {
-      typeText(bubble, text);
-    }
-
-    lastBotReply = text;
-
-  } else {
-    const bubble = document.createElement("div");
-    bubble.className = "bubble-user";
-    bubble.textContent = text;
-
-    const circle = document.createElement("div");
-    circle.className = "user-circle";
-
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(circle);
-
-    chat.appendChild(wrapper);
-
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
-  }
-
-  chatWrapper.scrollTop = chatWrapper.scrollHeight;
-}
     // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
