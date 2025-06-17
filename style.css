@@ -13,7 +13,7 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 120px; /* инпут и запас */
+  bottom: 83px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -29,13 +29,14 @@ body {
 .chat-container {
   display: flex;
   flex-direction: column;
-  /* 💡 Удалил justify-content: flex-start — не нужно! */
-  flex-grow: 1; /* 💡 Добавлено: чтобы контейнер тянулся по высоте обёртки */
+  flex-grow: 1;
   box-sizing: border-box;
+  padding-bottom: 55px; /* ✅ Добавь вот это! */
 }
 
-/* === Обёртки === */
+/* Обёртка */
 .bubble-wrapper, .user-wrapper {
+  position: relative;
   display: flex;
   align-items: flex-start;
   margin-bottom: 35px;
@@ -50,22 +51,28 @@ body {
   max-height: 1000px;
 }
 
+/* Бабл */
+.bubble-bot, .bubble-user {
+  position: relative;
+}
+
+/* Кружок */
 .bot-circle, .user-circle {
-  flex-shrink: 0;
+  position: absolute;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  margin-top: 10px;
+  bottom: -8px;
 }
 
 .bot-circle {
   background: #FFF;
-  margin-right: 10px;
+  left: -10px;
 }
 
 .user-circle {
   background: #1F1F1F;
-  margin-left: 10px;
+  right: -10px;
 }
 
 /* === Баблы === */
