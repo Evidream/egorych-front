@@ -268,4 +268,8 @@ body {
     width: 120px;
     height: 60px;
   }
+  .chat-wrapper,
+.chat-container {
+  overflow: visible !important;
+}
 }
