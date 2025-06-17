@@ -80,22 +80,43 @@ function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
-  // Кружок
+  // === Кружок ===
   const circle = document.createElement("div");
   circle.className = sender === "bot" ? "bot-circle" : "user-circle";
   wrapper.appendChild(circle);
   chat.appendChild(wrapper);
 
-  // Показываем кружок
+  // === Показываем кружок
   setTimeout(() => {
     wrapper.classList.add("show");
   }, 50);
 
-  // Через паузу добавляем бабл (+ кнопку если бот)
+  // === Через паузу добавляем бабл (с готовой шириной!) ===
   setTimeout(() => {
     const bubble = document.createElement("div");
     bubble.className = sender === "bot" ? "bubble-bot" : "bubble-user";
-    bubble.textContent = sender === "bot" ? "" : text;
+
+    if (sender === "bot") {
+      // === Меряем ширину заранее ===
+      const measure = document.createElement("span");
+      measure.style.visibility = "hidden";
+      measure.style.position = "absolute";
+      measure.style.whiteSpace = "pre-wrap";
+      measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
+      measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
+      measure.style.maxWidth = "767px";
+      measure.textContent = text;
+      document.body.appendChild(measure);
+
+      const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+      bubble.style.width = measuredWidth + "px";
+
+      document.body.removeChild(measure);
+
+      bubble.textContent = ""; // пустой, для печати позже
+    } else {
+      bubble.textContent = text;
+    }
 
     wrapper.appendChild(bubble);
 
@@ -107,16 +128,14 @@ function appendMessage(text, sender) {
       listenBtn.onclick = () => speak(text);
       wrapper.appendChild(listenBtn);
 
-      // Печатать по буквам
       typeText(bubble, text);
       lastBotReply = text;
     }
 
     bubble.classList.add("show");
 
-  }, 400); // 0.3 сек + запас
+  }, 400); // пауза после кружка
 
-  // Прокрутка вниз
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
@@ -196,7 +215,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0; // громкость максимум
+    audio.volume = 1.0;
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
