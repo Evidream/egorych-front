@@ -81,15 +81,13 @@ function appendMessage(text, sender) {
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
   if (sender === "bot") {
-    // === Создаём кружок
     const circle = document.createElement("div");
     circle.className = "bot-circle";
 
-    // === Создаём бабл
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
-    // === Фикс ширины
+    // === Хитрый фикс ширины перед печатью ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -100,33 +98,31 @@ function appendMessage(text, sender) {
     measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
 
     bubble.textContent = "";
 
-    // === Кнопка прослушать
     const listenBtn = document.createElement("img");
     listenBtn.src = "assets/listen-button.svg";
     listenBtn.alt = "Слушать";
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
-    // === Собираем правильный порядок: КРУЖОК → БАБЛ → LISTEN
-    wrapper.appendChild(circle);
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(listenBtn);
+    wrapper.appendChild(circle);   // ✅ кружок
+    wrapper.appendChild(bubble);   // ✅ бабл
+    wrapper.appendChild(listenBtn); // ✅ слушать
 
     chat.appendChild(wrapper);
 
-    // === Печатаем по буквам
+    // === Печатать по буквам
     typeText(bubble, text);
     lastBotReply = text;
 
   } else {
-    // === Для пользователя ===
+    // === Для пользователя аккуратно
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
     bubble.textContent = text;
@@ -134,14 +130,13 @@ function appendMessage(text, sender) {
     const circle = document.createElement("div");
     circle.className = "user-circle";
 
-    // === Порядок: БАБЛ → КРУЖОК
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(circle);
+    wrapper.appendChild(bubble);  // ✅ бабл
+    wrapper.appendChild(circle);  // ✅ кружок
 
     chat.appendChild(wrapper);
   }
 
-  // === Прокрутка вниз ===
+  // === Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
