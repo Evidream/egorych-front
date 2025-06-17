@@ -75,7 +75,7 @@ body {
   max-width: 767px;
   width: fit-content;
   padding: 20px 40px;
-  border-radius: 300px;
+  border-radius: 40px;
   background: #FFF;
   color: #303030;
   font-size: 20px;
@@ -91,7 +91,7 @@ body {
   max-width: 767px;
   width: fit-content;
   padding: 20px 40px;
-  border-radius: 300px;
+  border-radius: 40px;
   background: #1F1F1F;
   color: #FFF;
   font-size: 20px;
@@ -117,7 +117,7 @@ body {
   align-items: center;
   gap: 15px;
   background: #FFF;
-  border-radius: 300px;
+  border-radius: 40px;
   height: 83px;
   padding: 0 30px;
   position: fixed;
