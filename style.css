@@ -44,42 +44,13 @@ body {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.7s ease, transform 0.5s ease;
+  /* ✅ Больше НИКОГДА никакого max-height и overflow! */
 }
 
 .bubble-wrapper.show,
 .user-wrapper.show {
   opacity: 1;
   transform: translateY(0);
-}
-
-/* === КРУЖОК: начальное состояние === */
-.bubble-wrapper .bot-circle,
-.user-wrapper .user-circle {
-  opacity: 0;
-  transform: scale(0);
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* === КРУЖОК: финальное === */
-.bubble-wrapper.show .bot-circle,
-.user-wrapper.show .user-circle {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* === БАБЛ: начальное === */
-.bubble-bot,
-.bubble-user {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.3s ease 0.3s, transform 0.3s ease 0.3s; /* задержка после кружка */
-}
-
-/* === БАБЛ: финальное === */
-.bubble-wrapper.show .bubble-bot,
-.user-wrapper.show .bubble-user {
-  opacity: 1;
-  transform: scale(1);
 }
 
 /* === БАБЛЫ С ХВОСТИКОМ === */
@@ -97,6 +68,7 @@ body {
   font-weight: 500;
   word-wrap: break-word;
   box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .bubble-bot::before {
@@ -126,6 +98,7 @@ body {
   margin-left: auto;
   word-wrap: break-word;
   box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .bubble-user::after {
