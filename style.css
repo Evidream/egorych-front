@@ -52,27 +52,23 @@ body {
 }
 
 /* Бабл */
-.bubble-bot, .bubble-user {
-  position: relative;
-}
-
-/* Кружок */
-.bot-circle, .user-circle {
+.bot-circle,
+.user-circle {
   position: absolute;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  bottom: -8px;
+  width: 15.434px;     /* точно по фигме */
+  height: 15.434px;    /* точно по фигме */
+  border-radius: 50%;  /* чтобы был круг */
+  bottom: -10px;       /* опустить под бабл */
 }
 
 .bot-circle {
-  background: #FFF;
-  left: -10px;
+  background: #FFFFFF; /* белый кружок */
+  left: -10px;         /* слева от бабла */
 }
 
 .user-circle {
-  background: #1F1F1F;
-  right: -10px;
+  background: #1F1F1F; /* тёмный кружок */
+  right: -10px;        /* справа от бабла */
 }
 
 /* === Баблы === */
