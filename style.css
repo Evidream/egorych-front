@@ -76,7 +76,7 @@ body {
 
 /* === БАБЛЫ === */
 .bubble-bot {
-  position: relative; /* кружок позиционируется относительно бабла */
+  position: static; /* кружок позиционируется относительно бабла */
   display: inline-block;
   min-width: 50px;
   max-width: 767px;
@@ -93,7 +93,7 @@ body {
 }
 
 .bubble-user {
-  position: relative; /* кружок позиционируется относительно бабла */
+  position: static; /* кружок позиционируется относительно бабла */
   display: inline-block;
   min-width: 50px;
   max-width: 767px;
