@@ -78,18 +78,21 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Получаем email из Cookie ===
+// === Получаем email ЧИСТО ИЗ LOCALSTORAGE ===
 function getTildaEmail() {
-  const matches = document.cookie.match(/tildamembers=([^;]+)/);
-  if (matches && matches[1]) {
-    try {
-      const tildaData = JSON.parse(decodeURIComponent(matches[1]));
-      return tildaData.login || "";
-    } catch (e) {
-      console.log("❗ Не смог распарсить tildamembers cookie");
+  let email = "";
+  try {
+    const projectId = 13542835; // твой ID!
+    const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
+    const userData = lsUser ? JSON.parse(lsUser) : null;
+    if (userData && userData.login) {
+      email = userData.login;
     }
+  } catch (e) {
+    console.log("❗ Не смог получить email из LocalStorage");
   }
-  return "";
+  console.log("👉 FINAL EMAIL:", email);
+  return email;
 }
 
 // === Добавление баблов ===
@@ -168,10 +171,9 @@ async function send() {
     textInput.value = "";
 
     try {
-      // === Получаем email из Cookie надёжно ===
-      let actualEmail = getTildaEmail();
+      const actualEmail = getTildaEmail();
 
-      // === Если юзер залогинен — обнуляем guest лимит
+      // === Если юзер залогинен — сбрасываем guest лимит
       if (actualEmail) {
         localStorage.removeItem("egorych_guest_count");
         localGuestCount = 0;
@@ -192,7 +194,6 @@ async function send() {
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
 
-      // === Если гость — увеличиваем счётчик
       if (!actualEmail) {
         localGuestCount++;
         localStorage.setItem("egorych_guest_count", localGuestCount);
