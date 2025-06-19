@@ -176,15 +176,24 @@ async function send() {
         console.log("❗ Не смог получить email");
       }
 
+      // === Лимит для guest — локально
+      if (!actualEmail) {
+        if (localGuestCount >= 20) {
+          appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
+          isSending = false;
+          return;
+        }
+      }
+
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, email: actualEmail || "", localCount: localGuestCount })
+        body: JSON.stringify({ text, email: actualEmail || "" })
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
 
-      // === Если гость — обновляем локальный счетчик
+      // === Если гость — увеличиваем локальный счетчик
       if (!actualEmail) {
         localGuestCount++;
         localStorage.setItem("egorych_guest_count", localGuestCount);
