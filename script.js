@@ -176,6 +176,12 @@ async function send() {
         console.log("❗ Не смог получить email");
       }
 
+      // === Если юзер залогинился — сбрасываем guest лимит!
+      if (actualEmail) {
+        localStorage.removeItem("egorych_guest_count");
+        localGuestCount = 0;
+      }
+
       // === Лимит для guest — локально
       if (!actualEmail) {
         if (localGuestCount >= 20) {
