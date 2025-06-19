@@ -11,16 +11,20 @@ let lastBotReply = "";
 let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
+
 // === Вытаскиваю email из Tilda Members ===
-let currentUserEmail = "guest";
+let currentUserEmail = "";
 try {
   const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
   const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
   const userData = lsUser ? JSON.parse(lsUser) : null;
   if (userData && userData.login) currentUserEmail = userData.login;
 } catch (e) {
-  console.log("❗ Не смог получить email, используем guest");
+  console.log("❗ Не смог получить email, fallback на guest");
 }
+
+// === Локальный счетчик для guest ===
+let localGuestCount = Number(localStorage.getItem("egorych_guest_count")) || 0;
 
 // === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
@@ -94,7 +98,6 @@ function appendMessage(text, sender) {
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
-    // === Хитрый фикс ширины перед печатью ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -105,7 +108,7 @@ function appendMessage(text, sender) {
     measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
@@ -122,13 +125,10 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
-
-    // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
 
-    // Печатать по буквам
     typeText(bubble, text);
     lastBotReply = text;
 
@@ -138,18 +138,15 @@ function appendMessage(text, sender) {
     bubble.textContent = text;
 
     wrapper.appendChild(bubble);
-
     chat.appendChild(wrapper);
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
   }
 
-  // ✅ Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
-// === Печать по буквам ===
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
@@ -168,24 +165,31 @@ async function send() {
     textInput.value = "";
 
     try {
-    // === Каждый раз перед отправкой достаем свежий email ===
-let actualEmail = "guest";
-try {
-  const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
-  const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
-  const userData = lsUser ? JSON.parse(lsUser) : null;
-  if (userData && userData.login) actualEmail = userData.login;
-} catch (e) {
-  console.log("❗ Не смог получить email, используем guest");
-}
+      // === Каждый раз проверяем свежий email
+      let actualEmail = "";
+      try {
+        const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
+        const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
+        const userData = lsUser ? JSON.parse(lsUser) : null;
+        if (userData && userData.login) actualEmail = userData.login;
+      } catch (e) {
+        console.log("❗ Не смог получить email");
+      }
 
-const res = await fetch(`${BACKEND_URL}/chat`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ text, email: actualEmail })
-});
+      const res = await fetch(`${BACKEND_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, email: actualEmail || "", localCount: localGuestCount })
+      });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
+
+      // === Если гость — обновляем локальный счетчик
+      if (!actualEmail) {
+        localGuestCount++;
+        localStorage.setItem("egorych_guest_count", localGuestCount);
+      }
+
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -193,7 +197,6 @@ const res = await fetch(`${BACKEND_URL}/chat`, {
 
   if (selectedFile) {
     appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
-
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -236,7 +239,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
+    audio.volume = 1.0;
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
