@@ -11,6 +11,16 @@ let lastBotReply = "";
 let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
+// === Вытаскиваю email из Tilda Members ===
+let currentUserEmail = "guest";
+try {
+  const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
+  const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
+  const userData = lsUser ? JSON.parse(lsUser) : null;
+  if (userData && userData.login) currentUserEmail = userData.login;
+} catch (e) {
+  console.log("❗ Не смог получить email, используем guest");
+}
 
 // === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
@@ -161,7 +171,7 @@ async function send() {
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, email: currentUserEmail })
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
