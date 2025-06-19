@@ -78,18 +78,14 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Получаем email ЧЁТКО ИЗ LOCALSTORAGE ===
+// === Получаем email ИЗ URL (приходит через iframe) ===
 function getTildaEmail() {
   let email = "";
   try {
-    const projectId = 13542835; // твой проверенный ID
-    const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
-    const userData = lsUser ? JSON.parse(lsUser) : null;
-    if (userData && userData.login) {
-      email = userData.login;
-    }
+    const params = new URLSearchParams(window.location.search);
+    email = params.get("email") || "";
   } catch (e) {
-    console.log("❗ Не смог получить email из LocalStorage");
+    console.log("❗ Не смог получить email из URL");
   }
   console.log("👉 FINAL EMAIL:", email);
   return email;
