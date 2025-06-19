@@ -78,11 +78,11 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Получаем email ЧИСТО ИЗ LOCALSTORAGE ===
+// === Получаем email ЧЁТКО ИЗ LOCALSTORAGE ===
 function getTildaEmail() {
   let email = "";
   try {
-    const projectId = 13542835; // твой ID!
+    const projectId = 13542835; // твой проверенный ID
     const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
     const userData = lsUser ? JSON.parse(lsUser) : null;
     if (userData && userData.login) {
