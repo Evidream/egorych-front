@@ -78,6 +78,20 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
+// === Получаем email из Cookie ===
+function getTildaEmail() {
+  const matches = document.cookie.match(/tildamembers=([^;]+)/);
+  if (matches && matches[1]) {
+    try {
+      const tildaData = JSON.parse(decodeURIComponent(matches[1]));
+      return tildaData.login || "";
+    } catch (e) {
+      console.log("❗ Не смог распарсить tildamembers cookie");
+    }
+  }
+  return "";
+}
+
 // === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
@@ -154,18 +168,10 @@ async function send() {
     textInput.value = "";
 
     try {
-      // === Каждый раз получаем свежий email ===
-      let actualEmail = "";
-      try {
-        const projectId = 13542835; // твой Project ID, проверен!
-        const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
-        const userData = lsUser ? JSON.parse(lsUser) : null;
-        if (userData && userData.login) actualEmail = userData.login;
-      } catch (e) {
-        console.log("❗ Не смог получить email");
-      }
+      // === Получаем email из Cookie надёжно ===
+      let actualEmail = getTildaEmail();
 
-      // === Если юзер залогинен — обнуляем гест лимит
+      // === Если юзер залогинен — обнуляем guest лимит
       if (actualEmail) {
         localStorage.removeItem("egorych_guest_count");
         localGuestCount = 0;
