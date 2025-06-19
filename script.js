@@ -168,11 +168,22 @@ async function send() {
     textInput.value = "";
 
     try {
-      const res = await fetch(`${BACKEND_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, email: currentUserEmail })
-      });
+    // === Каждый раз перед отправкой достаем свежий email ===
+let actualEmail = "guest";
+try {
+  const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
+  const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
+  const userData = lsUser ? JSON.parse(lsUser) : null;
+  if (userData && userData.login) actualEmail = userData.login;
+} catch (e) {
+  console.log("❗ Не смог получить email, используем guest");
+}
+
+const res = await fetch(`${BACKEND_URL}/chat`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ text, email: actualEmail })
+});
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
     } catch {
