@@ -15,7 +15,7 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 // === Вытаскиваю email из Tilda Members ===
 let currentUserEmail = "";
 try {
-  const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
+  const projectId = 13542835; // 👈 Жёстко задаём твой Project ID
   const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
   const userData = lsUser ? JSON.parse(lsUser) : null;
   if (userData && userData.login) currentUserEmail = userData.login;
