@@ -12,17 +12,6 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// === Вытаскиваю email из Tilda Members ===
-let currentUserEmail = "";
-try {
-  const projectId = 13542835; // 👈 Жёстко задаём твой Project ID
-  const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
-  const userData = lsUser ? JSON.parse(lsUser) : null;
-  if (userData && userData.login) currentUserEmail = userData.login;
-} catch (e) {
-  console.log("❗ Не смог получить email, fallback на guest");
-}
-
 // === Локальный счетчик для guest ===
 let localGuestCount = Number(localStorage.getItem("egorych_guest_count")) || 0;
 
@@ -165,10 +154,10 @@ async function send() {
     textInput.value = "";
 
     try {
-      // === Каждый раз проверяем свежий email
+      // === Каждый раз получаем свежий email ===
       let actualEmail = "";
       try {
-        const projectId = parseInt(document.querySelector("#allrecords").dataset.tildaProjectId);
+        const projectId = 13542835; // твой Project ID, проверен!
         const lsUser = window.localStorage.getItem('tilda_members_profile' + projectId);
         const userData = lsUser ? JSON.parse(lsUser) : null;
         if (userData && userData.login) actualEmail = userData.login;
@@ -176,19 +165,17 @@ async function send() {
         console.log("❗ Не смог получить email");
       }
 
-      // === Если юзер залогинился — сбрасываем guest лимит!
+      // === Если юзер залогинен — обнуляем гест лимит
       if (actualEmail) {
         localStorage.removeItem("egorych_guest_count");
         localGuestCount = 0;
       }
 
-      // === Лимит для guest — локально
-      if (!actualEmail) {
-        if (localGuestCount >= 20) {
-          appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
-          isSending = false;
-          return;
-        }
+      // === Если гость — проверяем лимит
+      if (!actualEmail && localGuestCount >= 20) {
+        appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
+        isSending = false;
+        return;
       }
 
       const res = await fetch(`${BACKEND_URL}/chat`, {
@@ -199,7 +186,7 @@ async function send() {
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
 
-      // === Если гость — увеличиваем локальный счетчик
+      // === Если гость — увеличиваем счётчик
       if (!actualEmail) {
         localGuestCount++;
         localStorage.setItem("egorych_guest_count", localGuestCount);
