@@ -78,15 +78,9 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Получаем email ИЗ URL (приходит через iframe) ===
-function getTildaEmail() {
-  let email = "";
-  try {
-    const params = new URLSearchParams(window.location.search);
-    email = params.get("email") || "";
-  } catch (e) {
-    console.log("❗ Не смог получить email из URL");
-  }
+// === Получаем email ИЗ LOCALSTORAGE ===
+function getEgorychEmail() {
+  const email = localStorage.getItem('egorych_email') || "";
   console.log("👉 FINAL EMAIL:", email);
   return email;
 }
@@ -167,7 +161,7 @@ async function send() {
     textInput.value = "";
 
     try {
-      const actualEmail = getTildaEmail();
+      const actualEmail = getEgorychEmail();
 
       // === Если юзер залогинен — сбрасываем guest лимит
       if (actualEmail) {
@@ -185,7 +179,7 @@ async function send() {
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, email: actualEmail || "" })
+        body: JSON.stringify({ text, email: actualEmail })
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
