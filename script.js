@@ -256,3 +256,26 @@ async function speak(text) {
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
+
+console.log("====================");
+console.log("✅ Проверка LocalStorage:");
+console.log("egorych_email =", localStorage.getItem("egorych_email"));
+
+const projectIdCheck = document.querySelector('#allrecords')?.dataset?.tildaProjectId;
+console.log("projectId =", projectIdCheck);
+
+if (projectIdCheck) {
+  const tildaRaw = localStorage.getItem('tilda_members_profile' + projectIdCheck);
+  console.log("Tilda raw:", tildaRaw);
+  if (tildaRaw) {
+    try {
+      const tildaParsed = JSON.parse(tildaRaw);
+      console.log("Tilda login =", tildaParsed.login);
+    } catch (e) {
+      console.log("Ошибка парсинга tilda_members_profile:", e);
+    }
+  } else {
+    console.log("Нет tilda_members_profile для ProjectID");
+  }
+}
+console.log("====================");
