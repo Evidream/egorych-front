@@ -78,22 +78,15 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === ПРАВИЛЬНЫЙ getEgorychEmail ===
-function getEgorychEmail() {
-  let email = localStorage.getItem('egorych_email') || "";
-  if (!email) {
-    const projectId = document.querySelector('#allrecords')?.dataset?.tildaProjectId;
-    if (projectId) {
-      const tildaProfileRaw = localStorage.getItem('tilda_members_profile' + projectId);
-      if (tildaProfileRaw) {
-        try {
-          const tildaProfile = JSON.parse(tildaProfileRaw);
-          email = tildaProfile.login || "";
-        } catch (e) {
-          console.warn("Ошибка парсинга Tilda Profile:", e);
-        }
-      }
-    }
+// === Получаем email ИЗ TILDA STORAGE ===
+function getTildaEmail() {
+  let email = "";
+  try {
+    const projectId = document.querySelector("#allrecords").dataset.tildaprojectid;
+    const ls = localStorage.getItem('tilda_members_profile' + projectId);
+    email = ls ? JSON.parse(ls).login : "";
+  } catch (e) {
+    console.log("❗ Ошибка при получении email из Tilda:", e);
   }
   console.log("👉 FINAL EMAIL:", email);
   return email;
@@ -175,13 +168,15 @@ async function send() {
     textInput.value = "";
 
     try {
-      const actualEmail = getEgorychEmail();
+      const actualEmail = getTildaEmail();
 
+      // === Если юзер залогинен — сбрасываем guest лимит
       if (actualEmail) {
         localStorage.removeItem("egorych_guest_count");
         localGuestCount = 0;
       }
 
+      // === Если гость — проверяем лимит
       if (!actualEmail && localGuestCount >= 20) {
         appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
         isSending = false;
