@@ -12,7 +12,7 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// === Локальный счетчик для guest ===
+// === Локальный счётчик для guest ===
 let localGuestCount = Number(localStorage.getItem("egorych_guest_count")) || 0;
 
 // === Приветственный бабл ===
@@ -78,17 +78,29 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Получаем email ИЗ TILDA STORAGE ===
+// === НАДЁЖНЫЙ EMAIL ===
 function getTildaEmail() {
   let email = "";
   try {
-    const projectId = document.querySelector("#allrecords").dataset.tildaprojectid;
-    const ls = localStorage.getItem('tilda_members_profile' + projectId);
-    email = ls ? JSON.parse(ls).login : "";
+    // 1️⃣ Берём напрямую твой egorych_email
+    email = localStorage.getItem('egorych_email') || "";
+
+    // 2️⃣ Если пусто — fallback на TildaMembers
+    if (!email) {
+      const allrecords = document.querySelector("#allrecords");
+      if (allrecords) {
+        const projectId = allrecords.dataset.tildaprojectid;
+        const ls = localStorage.getItem('tilda_members_profile' + projectId);
+        email = ls ? JSON.parse(ls).login : "";
+      }
+    }
+
+    console.log("===================");
+    console.log("✅ Итоговый email:", email);
+    console.log("===================");
   } catch (e) {
-    console.log("❗ Ошибка при получении email из Tilda:", e);
+    console.log("❌ Ошибка в getTildaEmail:", e);
   }
-  console.log("👉 FINAL EMAIL:", email);
   return email;
 }
 
@@ -170,13 +182,13 @@ async function send() {
     try {
       const actualEmail = getTildaEmail();
 
-      // === Если юзер залогинен — сбрасываем guest лимит
+      // Если юзер залогинен — сбрасываем guest лимит
       if (actualEmail) {
         localStorage.removeItem("egorych_guest_count");
         localGuestCount = 0;
       }
 
-      // === Если гость — проверяем лимит
+      // Если гость — проверяем лимит
       if (!actualEmail && localGuestCount >= 20) {
         appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
         isSending = false;
