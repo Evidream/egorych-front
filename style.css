@@ -70,7 +70,7 @@ body {
 /* === Баблы === */
 .message-row {
   display: flex;
-  align-items: flex-start; /* Выравниваем по верхнему краю */
+  align-items: flex-start; /* Выравнивание по верхнему краю */
   margin-bottom: 20px;     /* Отступ между сообщениями */
 }
 
@@ -88,6 +88,7 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  line-height: 1.4;
 }
 
 .bubble-user {
@@ -105,14 +106,15 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  line-height: 1.4;
 }
 
-/* === Listen === */
+/* === Кнопка прослушивания === */
 .listen-button {
   width: 40px;
   height: 40px;
-  margin-left: 10px;
-  margin-top: 10px; /* Сдвигаем чуть вниз, чтобы не прилипало */
+  margin-left: 12px;
+  align-self: flex-start;   /* 💡 Важно! Прижимает к верхнему краю */
   cursor: pointer;
   flex-shrink: 0;
 }
