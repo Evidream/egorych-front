@@ -80,51 +80,53 @@ function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
-  if (sender === "bot") {
-    const circle = document.createElement("div");
-    circle.className = "bot-circle";
+if (sender === "bot") {
+  const circle = document.createElement("div");
+  circle.className = "bot-circle";
 
-    const bubble = document.createElement("div");
-    bubble.className = "bubble-bot";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble-bot";
 
-    // === Хитрый фикс ширины перед печатью ===
-    const measure = document.createElement("span");
-    measure.style.visibility = "hidden";
-    measure.style.position = "absolute";
-    measure.style.whiteSpace = "pre-wrap";
-    measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
-    measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
-    measure.style.maxWidth = "767px";
-    measure.textContent = text;
-    document.body.appendChild(measure);
+  const measure = document.createElement("span");
+  measure.style.visibility = "hidden";
+  measure.style.position = "absolute";
+  measure.style.whiteSpace = "pre-wrap";
+  measure.style.fontSize = window.getComputedStyle(bubble).fontSize;
+  measure.style.fontWeight = window.getComputedStyle(bubble).fontWeight;
+  measure.style.maxWidth = "767px";
+  measure.textContent = text;
+  document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
-    bubble.style.width = measuredWidth + "px";
+  const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+  bubble.style.width = measuredWidth + "px";
 
-    document.body.removeChild(measure);
+  document.body.removeChild(measure);
 
-    bubble.textContent = "";
+  bubble.textContent = "";
 
-    const listenBtn = document.createElement("img");
-    listenBtn.src = "assets/listen-button.svg";
-    listenBtn.alt = "Слушать";
-    listenBtn.className = "listen-button";
-    listenBtn.onclick = () => speak(text);
+  const listenBtn = document.createElement("img");
+  listenBtn.src = "assets/listen-button.svg";
+  listenBtn.alt = "Слушать";
+  listenBtn.className = "listen-button";
+  listenBtn.onclick = () => speak(text);
 
-    wrapper.appendChild(circle);
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(listenBtn);
+  // ✅ Оборачиваем бабл + кнопку в message-row
+  const row = document.createElement("div");
+  row.className = "message-row";
+  row.appendChild(bubble);
+  row.appendChild(listenBtn);
 
-    chat.appendChild(wrapper);
+  wrapper.appendChild(circle);
+  wrapper.appendChild(row);
+  chat.appendChild(wrapper);
 
-    // Плавное появление
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
+  setTimeout(() => {
+    wrapper.classList.add("show");
+  }, 50);
 
-    // Печатать по буквам
-    typeText(bubble, text);
-    lastBotReply = text;
+  typeText(bubble, text);
+  lastBotReply = text;
+}
 
   } else {
     const bubble = document.createElement("div");
