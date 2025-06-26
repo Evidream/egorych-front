@@ -12,12 +12,9 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// === Локальный счётчик для guest ===
-let localGuestCount = Number(localStorage.getItem("egorych_guest_count")) || 0;
-
 // === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
-  appendMessage("Ну чё ты, как ты, роднуля? Давай рассказывай - всё порешаем!", "bot");
+  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
 });
 
 textInput.addEventListener("keydown", (e) => {
@@ -78,32 +75,6 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === НАДЁЖНЫЙ EMAIL ===
-function getTildaEmail() {
-  let email = "";
-  try {
-    // 1️⃣ Берём напрямую твой egorych_email
-    email = localStorage.getItem('egorych_email') || "";
-
-    // 2️⃣ Если пусто — fallback на TildaMembers
-    if (!email) {
-      const allrecords = document.querySelector("#allrecords");
-      if (allrecords) {
-        const projectId = allrecords.dataset.tildaprojectid;
-        const ls = localStorage.getItem('tilda_members_profile' + projectId);
-        email = ls ? JSON.parse(ls).login : "";
-      }
-    }
-
-    console.log("===================");
-    console.log("✅ Итоговый email:", email);
-    console.log("===================");
-  } catch (e) {
-    console.log("❌ Ошибка в getTildaEmail:", e);
-  }
-  return email;
-}
-
 // === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
@@ -113,6 +84,7 @@ function appendMessage(text, sender) {
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
+    // === Хитрый фикс ширины перед печатью ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -123,7 +95,7 @@ function appendMessage(text, sender) {
     measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
@@ -140,10 +112,13 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
+
+    // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
 
+    // Печатать по буквам
     typeText(bubble, text);
     lastBotReply = text;
 
@@ -153,15 +128,18 @@ function appendMessage(text, sender) {
     bubble.textContent = text;
 
     wrapper.appendChild(bubble);
+
     chat.appendChild(wrapper);
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
   }
 
+  // ✅ Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
+// === Печать по буквам ===
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
@@ -180,34 +158,13 @@ async function send() {
     textInput.value = "";
 
     try {
-      const actualEmail = getTildaEmail();
-
-      // Если юзер залогинен — сбрасываем guest лимит
-      if (actualEmail) {
-        localStorage.removeItem("egorych_guest_count");
-        localGuestCount = 0;
-      }
-
-      // Если гость — проверяем лимит
-      if (!actualEmail && localGuestCount >= 20) {
-        appendMessage("🥲 Слушай, ты всё уже выговорил! Зарегистрируйся и продолжим без лимитов.", "bot");
-        isSending = false;
-        return;
-      }
-
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, email: actualEmail || "" })
+        body: JSON.stringify({ text })
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-
-      if (!actualEmail) {
-        localGuestCount++;
-        localStorage.setItem("egorych_guest_count", localGuestCount);
-      }
-
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -215,6 +172,7 @@ async function send() {
 
   if (selectedFile) {
     appendMessage(`📤 Отправка файла: ${selectedFile.name}`, "user");
+
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -257,33 +215,9 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0;
+    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
   }
 }
-
-console.log("====================");
-console.log("✅ Проверка LocalStorage:");
-console.log("egorych_email =", localStorage.getItem("egorych_email"));
-
-const projectIdCheck = document.querySelector('#allrecords')?.dataset?.tildaProjectId;
-console.log("projectId =", projectIdCheck);
-
-if (projectIdCheck) {
-  const tildaRaw = localStorage.getItem('tilda_members_profile' + projectIdCheck);
-  console.log("Tilda raw:", tildaRaw);
-  if (tildaRaw) {
-    try {
-      const tildaParsed = JSON.parse(tildaRaw);
-      console.log("Tilda login =", tildaParsed.login);
-    } catch (e) {
-      console.log("Ошибка парсинга tilda_members_profile:", e);
-    }
-  } else {
-    console.log("Нет tilda_members_profile для ProjectID");
-  }
-}
-console.log("====================");
-
