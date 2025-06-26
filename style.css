@@ -143,13 +143,15 @@ body {
 .send-button {
   width: 75px;
   height: 75px;
-  border-radius: 3000px;
-  border: 8px solid #9221BA;
+  border-radius: 50%;
   background: #8704B5;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;         /* <-- убрал жирную рамку */
+  box-shadow: none;     /* <-- на всякий случай */
+  padding: 0;
 }
 
 .send-icon {
