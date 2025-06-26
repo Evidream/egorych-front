@@ -13,7 +13,7 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 120px;
+  bottom: 120px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -36,20 +36,38 @@ body {
 /* === Обёртки === */
 .bubble-wrapper, .user-wrapper {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-end; /* ✅ было flex-start */
   margin-bottom: 35px;
   opacity: 0;
   transition: opacity 0.7s ease, max-height 0.5s ease;
-  max-height: 1000px;
-  overflow: visible;
-  position: relative;
+  max-height: 0;
+  overflow: hidden;
 }
 
 .bubble-wrapper.show, .user-wrapper.show {
   opacity: 1;
+  max-height: 1000px;
 }
 
-/* === Баблы с кружками === */
+.bot-circle, .user-circle {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  /* ✅ убрал margin-top */
+}
+
+.bot-circle {
+  background: #FFF;
+  margin-right: 10px;
+}
+
+.user-circle {
+  background: #1F1F1F;
+  margin-left: 10px;
+}
+
+/* === Баблы === */
 .bubble-bot {
   display: inline-block;
   min-width: 50px;
@@ -64,18 +82,6 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
-  position: relative;
-}
-
-.bubble-bot::before {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: -25px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #FFF;
 }
 
 .bubble-user {
@@ -93,21 +99,9 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
-  position: relative;
 }
 
-.bubble-user::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  right: -25px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #1F1F1F;
-}
-
-/* === Кнопка прослушки === */
+/* === Listen === */
 .listen-button {
   width: 80px;
   height: 80px;
