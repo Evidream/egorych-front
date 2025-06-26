@@ -1,10 +1,13 @@
-// === DOM-элементы ===
 const chat = document.getElementById("chat");
 const chatWrapper = document.getElementById("chat-wrapper");
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 const clipBtn = document.querySelector(".icon-clip");
 const cameraBtn = document.querySelector(".icon-camera");
+const fileInput = document.getElementById("fileInput");
+const filePreview = document.getElementById("filePreview");
+const fileNameEl = document.getElementById("fileName");
+const removeFileBtn = document.getElementById("removeFileBtn");
 
 let selectedFile = null;
 let mediaStream = null;
@@ -12,16 +15,12 @@ let lastBotReply = "";
 let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
-
-// === Лимит для guest ===
 let localGuestCount = Number(localStorage.getItem("egorych_guest_count")) || 0;
 
-// === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
   appendMessage("Ну чё ты, как ты, роднуля? Давай рассказывай - всё порешаем!", "bot");
 });
 
-// === Обработка Enter ===
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -29,22 +28,31 @@ textInput.addEventListener("keydown", (e) => {
   }
 });
 
-// === Прикрепление файла ===
-clipBtn.addEventListener("click", () => {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.style.display = "none";
-  document.body.appendChild(fileInput);
+// === Прикрепление файла через input ===
+fileInput.addEventListener("change", () => {
+  selectedFile = fileInput.files[0];
+  if (!selectedFile) return;
 
-  fileInput.addEventListener("change", () => {
-    selectedFile = fileInput.files[0];
-    document.body.removeChild(fileInput);
-  });
+  filePreview.style.display = "flex";
 
-  fileInput.click();
+  if (selectedFile.type.startsWith("image/")) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      fileNameEl.innerHTML = `<img src="${reader.result}" style="max-height:60px; border-radius:10px;">`;
+    };
+    reader.readAsDataURL(selectedFile);
+  } else {
+    fileNameEl.textContent = selectedFile.name;
+  }
 });
 
-// === Камера ===
+// === Удаление прикреплённого файла ===
+removeFileBtn.addEventListener("click", () => {
+  selectedFile = null;
+  fileInput.value = "";
+  filePreview.style.display = "none";
+});
+
 cameraBtn.addEventListener("click", openCamera);
 
 function openCamera() {
@@ -76,6 +84,8 @@ function takePhoto() {
   canvas.getContext("2d").drawImage(video, 0, 0);
   canvas.toBlob(blob => {
     selectedFile = new File([blob], "photo.jpg", { type: "image/jpeg" });
+    fileNameEl.innerHTML = `<img src="${URL.createObjectURL(blob)}" style="max-height:60px; border-radius:10px;">`;
+    filePreview.style.display = "flex";
     closeCamera();
   }, "image/jpeg");
 }
@@ -211,7 +221,10 @@ async function send() {
     } catch {
       appendMessage("❌ Ошибка при загрузке", "bot");
     }
+
     selectedFile = null;
+    fileInput.value = "";
+    filePreview.style.display = "none";
   }
 
   isSending = false;
