@@ -13,7 +13,7 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 138px; /* 83 инпут + 55 зазор */
+  bottom: 83px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -31,7 +31,7 @@ body {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: border-box;
-  padding-bottom: 55px; /* 👈 как у wrapper */
+  padding-bottom: 55px;
 }
 
 /* === ОБЁРТКИ === */
@@ -230,7 +230,7 @@ body {
     top: 20px;
     left: 20px;
     right: 20px;
-    bottom: 138px;
+    bottom: 100px;
   }
 
   .input-container {
