@@ -78,7 +78,7 @@ function closeCamera() {
 // === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
-  wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
+  wrapper.className = "message-row";
 
 if (sender === "bot") {
   const circle = document.createElement("div");
