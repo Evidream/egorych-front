@@ -68,12 +68,6 @@ body {
 }
 
 /* === Баблы === */
-.message-row {
-  display: flex;
-  align-items: flex-start; /* Выравнивание по верхнему краю */
-  margin-bottom: 20px;     /* Отступ между сообщениями */
-}
-
 .bubble-bot {
   display: inline-block;
   min-width: 50px;
@@ -88,7 +82,6 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
-  line-height: 1.4;
 }
 
 .bubble-user {
@@ -106,15 +99,13 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
-  line-height: 1.4;
 }
 
-/* === Кнопка прослушивания === */
+/* === Listen === */
 .listen-button {
-  width: 40px;
-  height: 40px;
-  margin-left: 12px;
-  align-self: flex-start;   /* 💡 Важно! Прижимает к верхнему краю */
+  width: 80px;
+  height: 80px;
+  margin-left: 10px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -152,20 +143,18 @@ body {
 .send-button {
   width: 75px;
   height: 75px;
-  border-radius: 50%;
+  border-radius: 3000px;
+  border: 8px solid #9221BA;
   background: #8704B5;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: none;         /* <-- убрал жирную рамку */
-  box-shadow: none;     /* <-- на всякий случай */
-  padding: 0;
 }
 
 .send-icon {
-  width: 75px;
-  height: 75px;
+  width: 28px;
+  height: 28px;
 }
 
 /* === Камера предпросмотр === */
