@@ -13,7 +13,7 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 120px; /* инпут и запас */
+  bottom: 120px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -29,20 +29,20 @@ body {
 .chat-container {
   display: flex;
   flex-direction: column;
-  /* 💡 Удалил justify-content: flex-start — не нужно! */
-  flex-grow: 1; /* 💡 Добавлено: чтобы контейнер тянулся по высоте обёртки */
+  flex-grow: 1;
   box-sizing: border-box;
 }
 
 /* === Обёртки === */
 .bubble-wrapper, .user-wrapper {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   margin-bottom: 35px;
   opacity: 0;
   transition: opacity 0.7s ease, max-height 0.5s ease;
   max-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .bubble-wrapper.show, .user-wrapper.show {
@@ -50,25 +50,7 @@ body {
   max-height: 1000px;
 }
 
-.bot-circle, .user-circle {
-  flex-shrink: 0;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  margin-top: 10px;
-}
-
-.bot-circle {
-  background: #FFF;
-  margin-right: 10px;
-}
-
-.user-circle {
-  background: #1F1F1F;
-  margin-left: 10px;
-}
-
-/* === Баблы === */
+/* === Баблы и кружочки === */
 .bubble-bot {
   display: inline-block;
   min-width: 50px;
@@ -83,6 +65,19 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.bubble-bot::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #FFF;
+  bottom: 0;
+  left: -25px;
+  transform: translateY(100%);
 }
 
 .bubble-user {
@@ -100,6 +95,19 @@ body {
   word-wrap: break-word;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.bubble-user::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #1F1F1F;
+  bottom: 0;
+  right: -25px;
+  transform: translateY(100%);
 }
 
 /* === Listen === */
