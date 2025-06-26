@@ -40,17 +40,16 @@ body {
   margin-bottom: 35px;
   opacity: 0;
   transition: opacity 0.7s ease, max-height 0.5s ease;
-  max-height: 0;
-  overflow: hidden;
+  max-height: 1000px;
+  overflow: visible;
   position: relative;
 }
 
 .bubble-wrapper.show, .user-wrapper.show {
   opacity: 1;
-  max-height: 1000px;
 }
 
-/* === Баблы и кружочки === */
+/* === Баблы с кружками === */
 .bubble-bot {
   display: inline-block;
   min-width: 50px;
@@ -71,13 +70,12 @@ body {
 .bubble-bot::before {
   content: "";
   position: absolute;
+  bottom: -10px;
+  left: -25px;
   width: 15px;
   height: 15px;
   border-radius: 50%;
   background: #FFF;
-  bottom: 0;
-  left: -25px;
-  transform: translateY(100%);
 }
 
 .bubble-user {
@@ -101,16 +99,15 @@ body {
 .bubble-user::after {
   content: "";
   position: absolute;
+  bottom: -10px;
+  right: -25px;
   width: 15px;
   height: 15px;
   border-radius: 50%;
   background: #1F1F1F;
-  bottom: 0;
-  right: -25px;
-  transform: translateY(100%);
 }
 
-/* === Listen === */
+/* === Кнопка прослушки === */
 .listen-button {
   width: 80px;
   height: 80px;
