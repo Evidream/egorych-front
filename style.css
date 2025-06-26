@@ -13,7 +13,7 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 120px; /* инпут и запас */
+  bottom: 160px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
