@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Егорыч — твой родной нейроассистент."/>
   <title>Егорыч</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ✅ Враппер для скролла: правильно -->
+  <!-- ✅ Враппер для скролла -->
   <div id="chat-wrapper" class="chat-wrapper">
-    <!-- Контейнер чата: правильно -->
     <div id="chat" class="chat-container">
-      <!-- Баблы рендерятся скриптом -->
+      <!-- Баблы появляются тут -->
     </div>
   </div>
 
-  <!-- ✅ Камера: ок -->
+  <!-- ✅ Камера предпросмотр -->
   <div id="cameraPreview" class="camera-preview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
@@ -25,20 +25,60 @@
     </div>
   </div>
 
-  <!-- ✅ Инпут и кнопки: ок -->
+  <!-- ✅ Превью прикреплённого файла -->
+  <div id="filePreview" style="display: none; position: fixed; bottom: 115px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 20px; max-width: 90%; font-family: 'Pragmatica', sans-serif; font-size: 16px; display: flex; align-items: center; gap: 10px;">
+    <span id="fileName" style="overflow-wrap: anywhere;"></span>
+    <button id="removeFileBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #F00;">✖</button>
+  </div>
+
+  <!-- ✅ Инпут и кнопки -->
   <div class="input-container">
-    <input id="textInput" type="text" placeholder="Что на душе?" />
+    <input id="textInput" type="text" placeholder="Что на душе?" autocomplete="off" />
+    
     <label for="fileInput" class="icon-clip">
-      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
+      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка" />
     </label>
-    <input id="fileInput" type="file" style="display:none"/>
-    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
+    <input id="fileInput" type="file" style="display:none" />
+
+    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()" />
+
     <div id="sendBtn" class="send-button">
-      <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
+      <img class="send-icon" src="assets/send-button.svg" alt="Отправить" />
     </div>
   </div>
 
-  <!-- ✅ Скрипт: ок -->
-  <script src="script.js"></script>
+  <!-- ✅ Основной скрипт -->
+  <script type="module" src="script.js"></script>
+
+  <!-- ✅ Превью и удаление файла -->
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const filePreview = document.getElementById("filePreview");
+    const fileNameEl = document.getElementById("fileName");
+    const removeFileBtn = document.getElementById("removeFileBtn");
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      fileNameEl.textContent = file.name;
+      filePreview.style.display = "flex";
+
+      // если это изображение — показываем картинку вместо текста
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          fileNameEl.innerHTML = `<img src="${reader.result}" style="max-height:60px; border-radius:10px;">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    removeFileBtn.addEventListener("click", () => {
+      fileInput.value = "";
+      filePreview.style.display = "none";
+    });
+  </script>
+
 </body>
 </html>
