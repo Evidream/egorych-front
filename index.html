@@ -9,14 +9,14 @@
 </head>
 <body>
 
-  <!-- ✅ Враппер для скролла -->
+  <!-- ✅ Чат -->
   <div id="chat-wrapper" class="chat-wrapper">
     <div id="chat" class="chat-container">
-      <!-- Баблы появляются тут -->
+      <!-- Баблы рендерятся скриптом -->
     </div>
   </div>
 
-  <!-- ✅ Камера предпросмотр -->
+  <!-- ✅ Камера -->
   <div id="cameraPreview" class="camera-preview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
@@ -25,58 +25,51 @@
     </div>
   </div>
 
-  <!-- ✅ Превью прикреплённого файла -->
-  <div id="filePreview" style="display: none; position: fixed; bottom: 115px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 20px; max-width: 90%; font-family: 'Pragmatica', sans-serif; font-size: 16px; display: flex; align-items: center; gap: 10px;">
-    <span id="fileName" style="overflow-wrap: anywhere;"></span>
-    <button id="removeFileBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #F00;">✖</button>
+  <!-- ✅ Превью файла -->
+  <div id="filePreview" class="file-preview" style="display: none;">
+    <img id="fileThumb" src="" alt="Файл" />
+    <button id="removeFileBtn">❌</button>
   </div>
 
-  <!-- ✅ Инпут и кнопки -->
+  <!-- ✅ Инпут -->
   <div class="input-container">
     <input id="textInput" type="text" placeholder="Что на душе?" autocomplete="off" />
-    
     <label for="fileInput" class="icon-clip">
       <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка" />
     </label>
     <input id="fileInput" type="file" style="display:none" />
-
     <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()" />
-
     <div id="sendBtn" class="send-button">
       <img class="send-icon" src="assets/send-button.svg" alt="Отправить" />
     </div>
   </div>
 
-  <!-- ✅ Основной скрипт -->
+  <!-- ✅ Скрипт -->
   <script type="module" src="script.js"></script>
 
-  <!-- ✅ Превью и удаление файла -->
+  <!-- ✅ File Preview Logic -->
   <script>
     const fileInput = document.getElementById("fileInput");
     const filePreview = document.getElementById("filePreview");
-    const fileNameEl = document.getElementById("fileName");
+    const fileThumb = document.getElementById("fileThumb");
     const removeFileBtn = document.getElementById("removeFileBtn");
 
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
       if (!file) return;
 
-      fileNameEl.textContent = file.name;
-      filePreview.style.display = "flex";
-
-      // если это изображение — показываем картинку вместо текста
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          fileNameEl.innerHTML = `<img src="${reader.result}" style="max-height:60px; border-radius:10px;">`;
-        };
-        reader.readAsDataURL(file);
-      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        fileThumb.src = reader.result;
+        filePreview.style.display = "flex";
+      };
+      reader.readAsDataURL(file);
     });
 
     removeFileBtn.addEventListener("click", () => {
       fileInput.value = "";
       filePreview.style.display = "none";
+      fileThumb.src = "";
     });
   </script>
 
