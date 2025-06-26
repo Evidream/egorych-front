@@ -16,22 +16,20 @@ body {
   bottom: 120px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* 💡 РАСТЁМ СВЕРХУ ВНИЗ как ChatGPT! */
   box-sizing: border-box;
   scrollbar-width: none;
 }
-
 .chat-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-/* ✅ Контейнер чата */
+/* === Контейнер чата === */
 .chat-container {
   display: flex;
   flex-direction: column;
-  /* 💡 Удалил justify-content: flex-start — не нужно! */
-  flex-grow: 1; /* 💡 Добавлено: чтобы контейнер тянулся по высоте обёртки */
-  box-sizing: border-box;
+  justify-content: flex-start;
+  min-height: 100%;
 }
 
 /* === Обёртки === */
@@ -71,7 +69,7 @@ body {
 /* === Баблы === */
 .bubble-bot {
   display: inline-block;
-  min-width: 50px;
+  min-width: 50px; /* Защита от дерганий */
   max-width: 767px;
   width: fit-content;
   padding: 20px 40px;
