@@ -68,6 +68,12 @@ body {
 }
 
 /* === Баблы === */
+.message-row {
+  display: flex;
+  align-items: flex-start; /* Выравниваем по верхнему краю */
+  margin-bottom: 20px;     /* Отступ между сообщениями */
+}
+
 .bubble-bot {
   display: inline-block;
   min-width: 50px;
@@ -103,9 +109,10 @@ body {
 
 /* === Listen === */
 .listen-button {
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   margin-left: 10px;
+  margin-top: 10px; /* Сдвигаем чуть вниз, чтобы не прилипало */
   cursor: pointer;
   flex-shrink: 0;
 }
