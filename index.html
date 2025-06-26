@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Егорыч — твой родной нейроассистент."/>
   <title>Егорыч</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ✅ Чат -->
+  <!-- ✅ Враппер для скролла: правильно -->
   <div id="chat-wrapper" class="chat-wrapper">
+    <!-- Контейнер чата: правильно -->
     <div id="chat" class="chat-container">
       <!-- Баблы рендерятся скриптом -->
     </div>
   </div>
 
-  <!-- ✅ Камера -->
+  <!-- ✅ Камера: ок -->
   <div id="cameraPreview" class="camera-preview">
     <video id="video" autoplay playsinline></video>
     <div class="camera-buttons">
@@ -25,53 +25,20 @@
     </div>
   </div>
 
-  <!-- ✅ Превью файла -->
-  <div id="filePreview" class="file-preview" style="display: none;">
-    <img id="fileThumb" src="" alt="Файл" />
-    <button id="removeFileBtn">❌</button>
-  </div>
-
-  <!-- ✅ Инпут -->
+  <!-- ✅ Инпут и кнопки: ок -->
   <div class="input-container">
-    <input id="textInput" type="text" placeholder="Что на душе?" autocomplete="off" />
+    <input id="textInput" type="text" placeholder="Что на душе?" />
     <label for="fileInput" class="icon-clip">
-      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка" />
+      <img src="assets/ant-design_paper-clip-outlined.svg" alt="Скрепка"/>
     </label>
-    <input id="fileInput" type="file" style="display:none" />
-    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()" />
+    <input id="fileInput" type="file" style="display:none"/>
+    <img class="icon-camera" src="assets/fluent_camera.svg" alt="Камера" onclick="openCamera()"/>
     <div id="sendBtn" class="send-button">
-      <img class="send-icon" src="assets/send-button.svg" alt="Отправить" />
+      <img class="send-icon" src="assets/send-button.svg" alt="Отправить"/>
     </div>
   </div>
 
-  <!-- ✅ Скрипт -->
-  <script type="module" src="script.js"></script>
-
-  <!-- ✅ File Preview Logic -->
-  <script>
-    const fileInput = document.getElementById("fileInput");
-    const filePreview = document.getElementById("filePreview");
-    const fileThumb = document.getElementById("fileThumb");
-    const removeFileBtn = document.getElementById("removeFileBtn");
-
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        fileThumb.src = reader.result;
-        filePreview.style.display = "flex";
-      };
-      reader.readAsDataURL(file);
-    });
-
-    removeFileBtn.addEventListener("click", () => {
-      fileInput.value = "";
-      filePreview.style.display = "none";
-      fileThumb.src = "";
-    });
-  </script>
-
+  <!-- ✅ Скрипт: ок -->
+  <script src="script.js"></script>
 </body>
 </html>
