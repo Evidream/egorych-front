@@ -33,7 +33,7 @@ body {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: border-box;
-  padding-bottom: 80px; /* ⬆️ чуть больше, чтобы хвостики не резались */
+  padding-bottom: 80px;
   overflow: visible !important;
 }
 
@@ -226,6 +226,39 @@ body {
   object-fit: contain;
 }
 
+/* === Превью прикрепленного файла === */
+.file-preview {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 8px 12px 8px 8px;
+  margin: 10px 0 0 0;
+  max-width: 200px;
+}
+
+.file-preview img {
+  max-height: 60px;
+  border-radius: 10px;
+  display: block;
+}
+
+.remove-file {
+  width: 20px;
+  height: 20px;
+  background: #FF3B3B;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
 /* === Медиа для мобилки === */
 @media (max-width: 768px) {
   .bubble-bot,
@@ -280,8 +313,18 @@ body {
     height: 60px;
   }
 
-  .chat-wrapper,
-  .chat-container {
-    overflow: visible !important;
+  .file-preview {
+    max-width: 140px;
+  }
+
+  .file-preview img {
+    max-height: 50px;
+  }
+
+  .remove-file {
+    width: 18px;
+    height: 18px;
+    font-size: 14px;
+    line-height: 18px;
   }
 }
