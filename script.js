@@ -81,6 +81,9 @@ function appendMessage(text, sender) {
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
 
   if (sender === "bot") {
+    const circle = document.createElement("div");
+    circle.className = "bot-circle";
+
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
@@ -108,6 +111,7 @@ function appendMessage(text, sender) {
     listenBtn.className = "listen-button";
     listenBtn.onclick = () => speak(text);
 
+    wrapper.appendChild(circle);
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
 
@@ -127,7 +131,11 @@ function appendMessage(text, sender) {
     bubble.className = "bubble-user";
     bubble.textContent = text;
 
+    const circle = document.createElement("div");
+    circle.className = "user-circle";
+
     wrapper.appendChild(bubble);
+    wrapper.appendChild(circle);
 
     chat.appendChild(wrapper);
     setTimeout(() => {
@@ -143,6 +151,7 @@ function appendMessage(text, sender) {
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
+    // ✅ Дополнительно обновляем прокрутку во время печати
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
     setTimeout(() => typeText(element, text, i + 1), 20);
   }
