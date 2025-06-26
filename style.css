@@ -13,51 +13,63 @@ body {
   top: 40px;
   left: 40px;
   right: 40px;
-  bottom: 138px; /* 83 инпут + 55 зазор */
+  bottom: 120px; /* инпут и запас */
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* 💡 РАСТЁМ СВЕРХУ ВНИЗ как ChatGPT! */
   box-sizing: border-box;
   scrollbar-width: none;
 }
-
 .chat-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-/* ✅ Контейнер чата */
+/* === Контейнер чата === */
 .chat-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  box-sizing: border-box;
-  padding-bottom: 55px; /* 👈 как у wrapper */
+  justify-content: flex-start;
+  min-height: 100%;
 }
 
-/* === ОБЁРТКИ === */
-.bubble-wrapper,
-.user-wrapper {
-  position: relative;
+/* === Обёртки === */
+.bubble-wrapper, .user-wrapper {
   display: flex;
   align-items: flex-start;
   margin-bottom: 35px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.7s ease, transform 0.5s ease;
-  /* ✅ Больше НИКОГДА никакого max-height и overflow! */
+  transition: opacity 0.7s ease, max-height 0.5s ease;
+  max-height: 0;
+  overflow: hidden;
 }
 
-.bubble-wrapper.show,
-.user-wrapper.show {
+.bubble-wrapper.show, .user-wrapper.show {
   opacity: 1;
-  transform: translateY(0);
+  max-height: 1000px;
 }
 
-/* === БАБЛЫ С ХВОСТИКОМ === */
+.bot-circle, .user-circle {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin-top: 10px;
+}
+
+.bot-circle {
+  background: #FFF;
+  margin-right: 10px;
+}
+
+.user-circle {
+  background: #1F1F1F;
+  margin-left: 10px;
+}
+
+/* === Баблы === */
 .bubble-bot {
-  position: relative;
   display: inline-block;
-  min-width: 50px;
+  min-width: 50px; /* Защита от дерганий */
   max-width: 767px;
   width: fit-content;
   padding: 20px 40px;
@@ -71,20 +83,7 @@ body {
   transition: all 0.3s ease;
 }
 
-.bubble-bot::before {
-  content: "";
-  position: absolute;
-  width: 15.434px;
-  height: 15.434px;
-  border-radius: 50%;
-  background: #FFFFFF;
-  bottom: 0;
-  left: -10px;
-  transform: translateY(50%);
-}
-
 .bubble-user {
-  position: relative;
   display: inline-block;
   min-width: 50px;
   max-width: 767px;
@@ -101,18 +100,6 @@ body {
   transition: all 0.3s ease;
 }
 
-.bubble-user::after {
-  content: "";
-  position: absolute;
-  width: 15.434px;
-  height: 15.434px;
-  border-radius: 50%;
-  background: #1F1F1F;
-  bottom: 0;
-  right: -10px;
-  transform: translateY(50%);
-}
-
 /* === Listen === */
 .listen-button {
   width: 80px;
@@ -126,11 +113,9 @@ body {
 .input-container {
   display: flex;
   align-items: center;
-  gap: 15px;
   background: #FFF;
-  border-radius: 40px;
-  height: 83px;
-  padding: 0 30px;
+  border-radius: 50px;
+  padding: 20px 30px;
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -144,6 +129,7 @@ body {
   border: none;
   outline: none;
   font-size: 20px;
+  margin-right: 15px;
 }
 
 .icon-clip, .icon-camera {
@@ -151,7 +137,6 @@ body {
   height: 36px;
   margin-right: 15px;
   cursor: pointer;
-  flex-shrink: 0;
 }
 
 .send-button {
@@ -164,12 +149,11 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  flex-shrink: 0;
 }
 
 .send-icon {
-  width: 28.85px;
-  height: 28.85px;
+  width: 28px;
+  height: 28px;
 }
 
 /* === Камера предпросмотр === */
@@ -230,7 +214,7 @@ body {
     top: 20px;
     left: 20px;
     right: 20px;
-    bottom: 138px;
+    bottom: 100px;
   }
 
   .input-container {
@@ -264,10 +248,5 @@ body {
   .camera-buttons button {
     width: 120px;
     height: 60px;
-  }
-
-  .chat-wrapper,
-  .chat-container {
-    overflow: visible !important;
   }
 }
