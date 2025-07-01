@@ -123,6 +123,7 @@ body {
   transform: translateX(-50%);
   width: calc(100% - 80px);
   max-width: 900px;
+  height: 83px;
 }
 
 .input-container input[type="text"] {
