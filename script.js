@@ -13,37 +13,39 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  function waitForEmail(retries = 10, delay = 200) {
-  const email = localStorage.getItem("egorych_email");
-  const session = localStorage.getItem("session");
+  let guestMessagesLeft = 20;
 
-  if (email && session) {
-    console.log("📩 Email из localStorage подтянулся:", email);
-    initChat(email);
-  } else if (retries > 0) {
-    console.log("⏳ Ждём появления email/session в localStorage...");
-    setTimeout(() => waitForEmail(retries - 1, delay), delay);
-  } else {
-    const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
-    const remaining = 20 - guestCount;
+  function waitForEmail(retries = 10, delay = 300) {
+    const email = localStorage.getItem("egorych_email");
+    const session = localStorage.getItem("session");
 
-    console.warn("⚠️ Email или session не появились → показываем гостя");
-    console.log(`👤 Гость. Осталось сообщений: ${remaining}`);
-
-    if (guestCount >= 20) {
-      appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
+    if (email && session) {
+      console.log("📩 Email из localStorage подтянулся:", email);
+      initChat(email);
+    } else if (retries > 0) {
+      console.log(`⏳ Ждём появления email/session в localStorage... (${retries})`);
+      setTimeout(() => waitForEmail(retries - 1, delay), delay);
     } else {
-      appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+      const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
+      guestMessagesLeft = 20 - guestCount;
+
+      console.warn("⚠️ Email или session не появились → показываем гостя");
+      console.log(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`);
+
+      if (guestMessagesLeft <= 0) {
+        appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
+      } else {
+        appendMessage(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`, "bot");
+      }
     }
   }
-}
 
-function initChat(email) {
-  // 💬 здесь вставь то, что раньше шло после if (!email || !session)
-  fetchUserInfo(email); // или другая логика, если она у тебя кастомная
-}
+  function initChat(email) {
+    fetchUserInfo(email); // 👈 кастомная логика, если надо — адаптируй
+  }
 
-waitForEmail(); // 🚀 запускаем ожидание
+  waitForEmail();
+});
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
