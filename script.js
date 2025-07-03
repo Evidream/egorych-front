@@ -13,7 +13,7 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const email = localStorage.getItem("egor.email") || "";
+  const email = localStorage.getItem("egorych_email") || "";
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
