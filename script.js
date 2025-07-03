@@ -14,10 +14,6 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const email = localStorage.getItem("egor.email") || "";
-  if (!email) {
-    appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
-    return;
-  }
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
@@ -35,7 +31,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     } else {
       appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
     }
-  } catch {
+  } catch (error) {
+    console.error("Ошибка при получении данных:", error);
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
   }
 });
