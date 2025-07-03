@@ -14,12 +14,10 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const email = localStorage.getItem("egorych_email") || "";
-const session = localStorage.getItem("session");
 console.log("📩 Email из localStorage:", email);
-console.log("📦 Session:", session);
 
-if (!email || !session) {
-  console.warn("⚠️ Нет email или session → показываем гостя без запроса");
+if (!email) {
+  console.warn("⚠️ Нет email → показываем гостя без запроса");
   appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
   return;
 }
