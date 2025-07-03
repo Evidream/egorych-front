@@ -143,6 +143,20 @@ function typeText(element, text, i = 0) {
   }
 }
 
+async function decreaseLimit() {
+  const email = localStorage.getItem("egorych_email");
+  if (!email) return;
+  try {
+    await fetch(`${BACKEND_URL}/decrease`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+  } catch (err) {
+    console.warn("⚠️ Ошибка при вычитании лимита", err);
+  }
+}
+
 async function send() {
   if (isSending) return;
   isSending = true;
@@ -160,17 +174,7 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-
-      // 🔥 Уменьшаем лимит через backend
-      const email = localStorage.getItem("egorych_email");
-      if (email) {
-        await fetch(`${BACKEND_URL}/decrease`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-      }
-
+      await decreaseLimit();
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -197,17 +201,7 @@ async function send() {
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-
-        // 🔥 Уменьшаем лимит после визуального ответа
-        const email = localStorage.getItem("egorych_email");
-        if (email) {
-          await fetch(`${BACKEND_URL}/decrease`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
-          });
-        }
-
+        await decreaseLimit();
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
