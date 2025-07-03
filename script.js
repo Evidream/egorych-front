@@ -243,7 +243,11 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-      await decreaseEgorychLimit();
+      const email = localStorage.getItem("egorych_email");
+const session = localStorage.getItem("session");
+if (email && session) {
+  await decreaseEgorychLimit();
+}
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -270,7 +274,11 @@ async function send() {
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-        await decreaseEgorychLimit();
+        const email = localStorage.getItem("egorych_email");
+const session = localStorage.getItem("session");
+if (email && session) {
+  await decreaseEgorychLimit();
+}
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
