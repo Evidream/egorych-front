@@ -13,14 +13,29 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const email = localStorage.getItem("egorych_email") || "";
-console.log("📩 Email из localStorage:", email);
+  function waitForEmail(retries = 10, delay = 200) {
+  const email = localStorage.getItem("egorych_email");
+  const session = localStorage.getItem("session");
 
-if (!email) {
-  console.warn("⚠️ Нет email → показываем гостя без запроса");
-  appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
-  return;
+  if (email && session) {
+    console.log("📩 Email из localStorage подтянулся:", email);
+    initChat(email);
+  } else if (retries > 0) {
+    console.log("⏳ Ждём появления email/session в localStorage...");
+    setTimeout(() => waitForEmail(retries - 1, delay), delay);
+  } else {
+    console.warn("⚠️ Email или session не появились → показываем гостя");
+    appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+  }
 }
+
+function initChat(email) {
+  // 💬 здесь вставь то, что раньше шло после if (!email || !session)
+  // например:
+  fetchUserInfo(email); // или что у тебя там вызывается
+}
+
+waitForEmail(); // 🚀 запускаем ожидание
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
