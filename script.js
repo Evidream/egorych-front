@@ -9,35 +9,34 @@ let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
+let userEmail = ""; // 🆕 глобальная переменная email
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const email = window.egorychEmail || localStorage.getItem("egorych_email") || "";
-  console.log("📩 Email из localStorage:", email);
+  // 🧹 Очищаем старые значения
+  localStorage.removeItem("egorych_email");
 
-  if (!email) {
-    console.warn("⚠️ Email отсутствует в localStorage");
+  // 🧠 Приоритет: сначала window, потом localStorage (всё равно обнулим выше)
+  userEmail = window.egorychEmail || "";
+
+  if (userEmail) {
+    localStorage.setItem("egorych_email", userEmail);
+    console.log("✅ Email из window.egorychEmail:", userEmail);
+  } else {
+    console.warn("⚠️ Email не найден");
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
     return;
   }
 
   try {
-    const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
-    if (!res.ok) {
-      throw new Error(`Ошибка запроса: ${res.status}`);
-    }
+    const res = await fetch(`${BACKEND_URL}/user-info?email=${userEmail}`);
+    if (!res.ok) throw new Error(`Ошибка запроса: ${res.status}`);
 
     const data = await res.json();
     console.log("📦 Ответ от /user-info:", data);
 
-    if (!data || !data.plan) {
-      console.warn("⚠️ План отсутствует в ответе");
-      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-      return;
-    }
-
-    const plan = data.plan;
+    const plan = data?.plan || "unknown";
     console.log("🍺 Тариф пользователя:", plan);
 
     switch (plan) {
@@ -55,7 +54,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         break;
       default:
         appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-        break;
     }
   } catch (error) {
     console.error("❌ Ошибка при получении данных:", error);
@@ -191,10 +189,8 @@ function typeText(element, text, i = 0) {
 }
 
 async function decreaseEgorychLimit() {
-  const email = window.egorychEmail || localStorage.getItem("egorych_email") || "";
-  console.log("🔁 Пытаемся уменьшить лимит для:", email);
-  if (!email) {
-    console.warn("⚠️ Email не найден в localStorage");
+  if (!userEmail) {
+    console.warn("⚠️ Email не установлен");
     return;
   }
 
@@ -202,7 +198,7 @@ async function decreaseEgorychLimit() {
     const res = await fetch(`${BACKEND_URL}/decrease`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email: userEmail }),
     });
     const json = await res.json();
     console.log("✅ Ответ от /decrease:", json);
