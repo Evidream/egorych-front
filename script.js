@@ -18,18 +18,30 @@ window.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
     const data = await res.json();
-    const plan = data.plan || "guest";
 
-    if (plan === "guest") {
-      appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
-    } else if (plan === "user") {
-      appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
-    } else if (plan === "beer") {
-      appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
-    } else if (plan === "whisky") {
-      appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
-    } else {
+    if (!data || !data.plan) {
       appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+      return;
+    }
+
+    const plan = data.plan;
+
+    switch (plan) {
+      case "guest":
+        appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+        break;
+      case "user":
+        appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
+        break;
+      case "beer":
+        appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
+        break;
+      case "whisky":
+        appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
+        break;
+      default:
+        appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+        break;
     }
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
