@@ -143,6 +143,27 @@ function typeText(element, text, i = 0) {
   }
 }
 
+async function decreaseEgorychLimit() {
+  const email = localStorage.getItem("egorych_email");
+  console.log("🔁 Пытаемся уменьшить лимит для:", email);
+  if (!email) {
+    console.warn("⚠️ Email не найден в localStorage");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/decrease`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    console.log("✅ Ответ от /decrease:", json);
+  } catch (err) {
+    console.error("❌ Ошибка при уменьшении лимита:", err);
+  }
+}
+
 async function send() {
   if (isSending) return;
   isSending = true;
@@ -160,10 +181,7 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-
-      // ✅ Снижение лимита
-      if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
-
+      await decreaseEgorychLimit();
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -190,10 +208,7 @@ async function send() {
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-
-        // ✅ Снижение лимита
-        if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
-
+        await decreaseEgorychLimit();
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
