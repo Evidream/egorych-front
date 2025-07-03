@@ -13,7 +13,7 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const email = localStorage.getItem("egorych_email") || "";
+  const email = window.egorychEmail || localStorage.getItem("egorych_email") || "";
   console.log("📩 Email из localStorage:", email);
 
   if (!email) {
@@ -191,7 +191,7 @@ function typeText(element, text, i = 0) {
 }
 
 async function decreaseEgorychLimit() {
-  const email = localStorage.getItem("egorych_email");
+  const email = window.egorychEmail || localStorage.getItem("egorych_email") || "";
   console.log("🔁 Пытаемся уменьшить лимит для:", email);
   if (!email) {
     console.warn("⚠️ Email не найден в localStorage");
