@@ -14,13 +14,15 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const email = localStorage.getItem("egorych_email") || "";
-  console.log("📩 Email из localStorage:", email);
+const session = localStorage.getItem("session");
+console.log("📩 Email из localStorage:", email);
+console.log("📦 Session:", session);
 
-  if (!email) {
-    console.warn("⚠️ Email отсутствует в localStorage");
-    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-    return;
-  }
+if (!email || !session) {
+  console.warn("⚠️ Нет email или session → показываем гостя без запроса");
+  appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+  return;
+}
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
