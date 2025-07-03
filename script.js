@@ -12,8 +12,32 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-window.addEventListener("DOMContentLoaded", () => {
-  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
+window.addEventListener("DOMContentLoaded", async () => {
+  const email = localStorage.getItem("egor.email") || "";
+  if (!email) {
+    appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
+    const data = await res.json();
+    const plan = data.plan || "guest";
+
+    if (plan === "guest") {
+      appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+    } else if (plan === "user") {
+      appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
+    } else if (plan === "beer") {
+      appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
+    } else if (plan === "whisky") {
+      appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
+    } else {
+      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+    }
+  } catch {
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+  }
 });
 
 textInput.addEventListener("keydown", (e) => {
