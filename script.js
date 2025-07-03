@@ -13,72 +13,54 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let guestMessagesLeft = 20;
+  const email = localStorage.getItem("egorych_email") || "";
+  console.log("📩 Email из localStorage:", email);
 
-  async function initChat(email) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
-      if (!res.ok) throw new Error(`Ошибка запроса: ${res.status}`);
+  if (!email) {
+    console.warn("⚠️ Email отсутствует в localStorage");
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+    return;
+  }
 
-      const data = await res.json();
-      console.log("📦 Ответ от /user-info:", data);
+  try {
+    const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
+    if (!res.ok) {
+      throw new Error(`Ошибка запроса: ${res.status}`);
+    }
 
-      if (!data || !data.plan) {
-        console.warn("⚠️ План отсутствует в ответе");
+    const data = await res.json();
+    console.log("📦 Ответ от /user-info:", data);
+
+    if (!data || !data.plan) {
+      console.warn("⚠️ План отсутствует в ответе");
+      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+      return;
+    }
+
+    const plan = data.plan;
+    console.log("🍺 Тариф пользователя:", plan);
+
+    switch (plan) {
+      case "guest":
+        appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+        break;
+      case "user":
+        appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
+        break;
+      case "beer":
+        appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
+        break;
+      case "whisky":
+        appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
+        break;
+      default:
         appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-        return;
-      }
-
-      const plan = data.plan;
-      console.log("🍺 Тариф пользователя:", plan);
-
-      switch (plan) {
-        case "guest":
-          appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
-          break;
-        case "user":
-          appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
-          break;
-        case "beer":
-          appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
-          break;
-        case "whisky":
-          appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error("❌ Ошибка при получении данных:", error);
+        break;
     }
+  } catch (error) {
+    console.error("❌ Ошибка при получении данных:", error);
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
   }
-
-  function waitForEmail(retries = 10, delay = 300) {
-    const email = localStorage.getItem("egorych_email");
-    const session = localStorage.getItem("session");
-
-    if (email && session) {
-      console.log("📩 Email из localStorage подтянулся:", email);
-      initChat(email);
-    } else if (retries > 0) {
-      console.log(`⏳ Ждём появления email/session в localStorage... (${retries})`);
-      setTimeout(() => waitForEmail(retries - 1, delay), delay);
-    } else {
-      const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
-      guestMessagesLeft = 20 - guestCount;
-
-      console.warn("⚠️ Email или session не появились → показываем гостя");
-      console.log(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`);
-
-      if (guestMessagesLeft <= 0) {
-        appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
-      } else {
-        appendMessage(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`, "bot");
-      }
-    }
-  }
-
-  waitForEmail();
 });
 
 textInput.addEventListener("keydown", (e) => {
@@ -246,10 +228,7 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-
-      const email = localStorage.getItem("egorych_email");
-      const session = localStorage.getItem("session");
-      if (email && session) await decreaseEgorychLimit();
+      await decreaseEgorychLimit();
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -276,10 +255,7 @@ async function send() {
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
-
-        const email = localStorage.getItem("egorych_email");
-        const session = localStorage.getItem("session");
-        if (email && session) await decreaseEgorychLimit();
+        await decreaseEgorychLimit();
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
