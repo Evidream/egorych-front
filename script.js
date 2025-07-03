@@ -12,7 +12,6 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
   appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
 });
@@ -75,7 +74,6 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
@@ -115,14 +113,10 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
-
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
+    setTimeout(() => wrapper.classList.add("show"), 50);
 
     typeText(bubble, text);
     lastBotReply = text;
-
   } else {
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
@@ -135,15 +129,12 @@ function appendMessage(text, sender) {
     wrapper.appendChild(circle);
 
     chat.appendChild(wrapper);
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
+    setTimeout(() => wrapper.classList.add("show"), 50);
   }
 
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
-// === Печать по буквам ===
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
@@ -170,8 +161,15 @@ async function send() {
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
 
-      // ✅ Уменьшаем лимит после текстового ответа
-      if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
+      // 🔥 Уменьшаем лимит через backend
+      const email = localStorage.getItem("egorych_email");
+      if (email) {
+        await fetch(`${BACKEND_URL}/decrease`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+      }
 
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
@@ -200,8 +198,15 @@ async function send() {
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
 
-        // ✅ Уменьшаем лимит после визуального ответа
-        if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
+        // 🔥 Уменьшаем лимит после визуального ответа
+        const email = localStorage.getItem("egorych_email");
+        if (email) {
+          await fetch(`${BACKEND_URL}/decrease`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+          });
+        }
 
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
