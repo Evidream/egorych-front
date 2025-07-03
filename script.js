@@ -9,20 +9,18 @@ let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
-let userEmail = ""; // 🆕 глобальная переменная email
+let userEmail = localStorage.getItem("egorych_email") || ""; // 🆕 приоритет localStorage
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  // 🧹 Очищаем старые значения
-  localStorage.removeItem("egorych_email");
-
-  // 🧠 Приоритет: сначала window, потом localStorage (всё равно обнулим выше)
-  userEmail = window.egorychEmail || "";
-
-  if (userEmail) {
+  // 🧠 Приоритет: сначала window → потом localStorage
+  if (window.egorychEmail) {
+    userEmail = window.egorychEmail;
     localStorage.setItem("egorych_email", userEmail);
     console.log("✅ Email из window.egorychEmail:", userEmail);
+  } else if (userEmail) {
+    console.log("✅ Email из localStorage:", userEmail);
   } else {
     console.warn("⚠️ Email не найден");
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
