@@ -15,31 +15,6 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 window.addEventListener("DOMContentLoaded", async () => {
   let guestMessagesLeft = 20;
 
-  function waitForEmail(retries = 10, delay = 300) {
-    const email = localStorage.getItem("egorych_email");
-    const session = localStorage.getItem("session");
-
-    if (email && session) {
-      console.log("📩 Email из localStorage подтянулся:", email);
-      initChat(email);
-    } else if (retries > 0) {
-      console.log(`⏳ Ждём появления email/session в localStorage... (${retries})`);
-      setTimeout(() => waitForEmail(retries - 1, delay), delay);
-    } else {
-      const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
-      guestMessagesLeft = 20 - guestCount;
-
-      console.warn("⚠️ Email или session не появились → показываем гостя");
-      console.log(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`);
-
-      if (guestMessagesLeft <= 0) {
-        appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
-      } else {
-        appendMessage(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`, "bot");
-      }
-    }
-  }
-
   async function initChat(email) {
     try {
       const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
@@ -75,6 +50,31 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error("❌ Ошибка при получении данных:", error);
+    }
+  }
+
+  function waitForEmail(retries = 10, delay = 300) {
+    const email = localStorage.getItem("egorych_email");
+    const session = localStorage.getItem("session");
+
+    if (email && session) {
+      console.log("📩 Email из localStorage подтянулся:", email);
+      initChat(email);
+    } else if (retries > 0) {
+      console.log(`⏳ Ждём появления email/session в localStorage... (${retries})`);
+      setTimeout(() => waitForEmail(retries - 1, delay), delay);
+    } else {
+      const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
+      guestMessagesLeft = 20 - guestCount;
+
+      console.warn("⚠️ Email или session не появились → показываем гостя");
+      console.log(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`);
+
+      if (guestMessagesLeft <= 0) {
+        appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
+      } else {
+        appendMessage(`👤 Гость. Осталось сообщений: ${guestMessagesLeft}`, "bot");
+      }
     }
   }
 
