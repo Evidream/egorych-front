@@ -24,15 +24,23 @@ window.addEventListener("DOMContentLoaded", async () => {
     console.log("⏳ Ждём появления email/session в localStorage...");
     setTimeout(() => waitForEmail(retries - 1, delay), delay);
   } else {
+    const guestCount = parseInt(localStorage.getItem("guest_count") || "0", 10);
+    const remaining = 20 - guestCount;
+
     console.warn("⚠️ Email или session не появились → показываем гостя");
-    appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+    console.log(`👤 Гость. Осталось сообщений: ${remaining}`);
+
+    if (guestCount >= 20) {
+      appendMessage("🚫 Привет, гость! Ты исчерпал лимит из 20 сообщений. Авторизуйся, родной ✋", "bot");
+    } else {
+      appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+    }
   }
 }
 
 function initChat(email) {
   // 💬 здесь вставь то, что раньше шло после if (!email || !session)
-  // например:
-  fetchUserInfo(email); // или что у тебя там вызывается
+  fetchUserInfo(email); // или другая логика, если она у тебя кастомная
 }
 
 waitForEmail(); // 🚀 запускаем ожидание
