@@ -87,7 +87,6 @@ function appendMessage(text, sender) {
     const bubble = document.createElement("div");
     bubble.className = "bubble-bot";
 
-    // === Хитрый фикс ширины перед печатью ===
     const measure = document.createElement("span");
     measure.style.visibility = "hidden";
     measure.style.position = "absolute";
@@ -98,7 +97,7 @@ function appendMessage(text, sender) {
     measure.textContent = text;
     document.body.appendChild(measure);
 
-    const measuredWidth = Math.min(measure.offsetWidth + 40, 767); // padding approx
+    const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
     bubble.style.width = measuredWidth + "px";
 
     document.body.removeChild(measure);
@@ -117,12 +116,10 @@ function appendMessage(text, sender) {
 
     chat.appendChild(wrapper);
 
-    // Плавное появление
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
 
-    // Печатать по буквам
     typeText(bubble, text);
     lastBotReply = text;
 
@@ -143,7 +140,6 @@ function appendMessage(text, sender) {
     }, 50);
   }
 
-  // ✅ Прокрутка вниз — враппер
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
@@ -151,7 +147,6 @@ function appendMessage(text, sender) {
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
-    // ✅ Дополнительно обновляем прокрутку во время печати
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
     setTimeout(() => typeText(element, text, i + 1), 20);
   }
@@ -174,6 +169,10 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
+
+      // ✅ Уменьшаем лимит после текстового ответа
+      if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
+
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -200,6 +199,10 @@ async function send() {
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
+
+        // ✅ Уменьшаем лимит после визуального ответа
+        if (window.decreaseEgorychLimit) window.decreaseEgorychLimit();
+
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
@@ -224,7 +227,7 @@ async function speak(text) {
     });
     const audioData = await res.arrayBuffer();
     const audio = new Audio(URL.createObjectURL(new Blob([audioData], { type: "audio/mpeg" })));
-    audio.volume = 1.0; // ✅ ГРОМКОСТЬ максимум
+    audio.volume = 1.0;
     audio.play();
   } catch {
     appendMessage("❌ Ошибка озвучки", "bot");
