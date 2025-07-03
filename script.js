@@ -14,7 +14,17 @@ let userEmail = localStorage.getItem("egorych_email") || ""; // 🆕 приор�
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  // 🧠 Приоритет: сначала window → потом localStorage
+  // 🆕 Парсим email из URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const emailFromUrl = urlParams.get("email");
+
+  if (emailFromUrl) {
+    userEmail = emailFromUrl;
+    localStorage.setItem("egorych_email", userEmail);
+    console.log("✅ Email из URL:", userEmail);
+  }
+
+  // 🧠 Приоритет: window → localStorage
   if (window.egorychEmail) {
     userEmail = window.egorychEmail;
     localStorage.setItem("egorych_email", userEmail);
