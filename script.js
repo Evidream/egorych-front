@@ -14,19 +14,31 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const email = localStorage.getItem("egorych_email") || "";
-console.log("💌 Email из localStorage:", email);
+  console.log("📩 Email из localStorage:", email);
 
+  if (!email) {
+    console.warn("⚠️ Email отсутствует в localStorage");
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+    return;
+  }
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
+    if (!res.ok) {
+      throw new Error(`Ошибка запроса: ${res.status}`);
+    }
+
     const data = await res.json();
+    console.log("📦 Ответ от /user-info:", data);
 
     if (!data || !data.plan) {
+      console.warn("⚠️ План отсутствует в ответе");
       appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
       return;
     }
 
     const plan = data.plan;
+    console.log("🍺 Тариф пользователя:", plan);
 
     switch (plan) {
       case "guest":
@@ -46,7 +58,7 @@ console.log("💌 Email из localStorage:", email);
         break;
     }
   } catch (error) {
-    console.error("Ошибка при получении данных:", error);
+    console.error("❌ Ошибка при получении данных:", error);
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
   }
 });
