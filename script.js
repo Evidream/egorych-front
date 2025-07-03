@@ -9,28 +9,40 @@ let selectedFile = null;
 let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
-let userEmail = localStorage.getItem("egorych_email") || ""; // 🆕 приоритет localStorage
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
+let userEmail = ""; // 🆕 приоритет: window → localStorage → URL
+
 window.addEventListener("DOMContentLoaded", async () => {
-  // 🆕 Парсим email из URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const emailFromUrl = urlParams.get("email");
-
-  if (emailFromUrl) {
-    userEmail = emailFromUrl;
-    localStorage.setItem("egorych_email", userEmail);
-    console.log("✅ Email из URL:", userEmail);
-  }
-
-  // 🧠 Приоритет: window → localStorage
+  // 1️⃣ Из window (самый приоритетный)
   if (window.egorychEmail) {
     userEmail = window.egorychEmail;
-    localStorage.setItem("egorych_email", userEmail);
     console.log("✅ Email из window.egorychEmail:", userEmail);
-  } else if (userEmail) {
-    console.log("✅ Email из localStorage:", userEmail);
+  }
+
+  // 2️⃣ Если не нашли — пробуем localStorage
+  if (!userEmail) {
+    const local = localStorage.getItem("egorych_email");
+    if (local) {
+      userEmail = local;
+      console.log("✅ Email из localStorage:", userEmail);
+    }
+  }
+
+  // 3️⃣ Если всё ещё пусто — парсим из URL
+  if (!userEmail) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailFromUrl = urlParams.get("email");
+    if (emailFromUrl) {
+      userEmail = emailFromUrl;
+      console.log("✅ Email из URL:", userEmail);
+    }
+  }
+
+  // 4️⃣ Сохраняем, если нашли
+  if (userEmail) {
+    localStorage.setItem("egorych_email", userEmail);
   } else {
     console.warn("⚠️ Email не найден");
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
@@ -68,6 +80,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
   }
 });
+
+// ... всё остальное (events, camera, send, speak и т.д.) остаётся без изменений
 
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
