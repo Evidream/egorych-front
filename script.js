@@ -10,12 +10,12 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
-console.log("💌 Email из localStorage:", email);
-
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
   const email = localStorage.getItem("egorych_email") || "";
+console.log("💌 Email из localStorage:", email);
+
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
