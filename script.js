@@ -13,7 +13,7 @@ let isSending = false;
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
-  function waitForEmail(retries = 10, delay = 200) {
+  function waitForEmail(retries = 3, delay = 200) {
   const email = localStorage.getItem("egorych_email");
   const session = localStorage.getItem("session");
 
