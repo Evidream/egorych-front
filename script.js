@@ -10,6 +10,8 @@ let mediaStream = null;
 let lastBotReply = "";
 let isSending = false;
 
+console.log("💌 Email из localStorage:", email);
+
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
 window.addEventListener("DOMContentLoaded", async () => {
