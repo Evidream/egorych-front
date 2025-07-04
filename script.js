@@ -1,3 +1,5 @@
+// === ВЕРСИЯ С ВЫЧИТАНИЕМ ИЗ ЛИМИТА ===
+
 const chat = document.getElementById("chat");
 const chatWrapper = document.getElementById("chat-wrapper");
 const textInput = document.getElementById("textInput");
@@ -12,7 +14,6 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// === Приветственный бабл ===
 window.addEventListener("DOMContentLoaded", () => {
   appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
 });
@@ -75,7 +76,6 @@ function closeCamera() {
   document.getElementById("cameraPreview").style.display = "none";
 }
 
-// === Добавление баблов ===
 function appendMessage(text, sender) {
   const wrapper = document.createElement("div");
   wrapper.className = sender === "bot" ? "bubble-wrapper" : "user-wrapper";
@@ -115,6 +115,7 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
+
     setTimeout(() => {
       wrapper.classList.add("show");
     }, 50);
@@ -142,7 +143,6 @@ function appendMessage(text, sender) {
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
 }
 
-// === Печать по буквам ===
 function typeText(element, text, i = 0) {
   if (i < text.length) {
     element.textContent += text.charAt(i);
@@ -151,7 +151,6 @@ function typeText(element, text, i = 0) {
   }
 }
 
-// === Отправка текста и файлов ===
 async function send() {
   if (isSending) return;
   isSending = true;
@@ -170,15 +169,22 @@ async function send() {
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
 
-      // ✅ Уменьшаем лимит только после ответа
-      const email = localStorage.getItem("egorych_email");
-      if (email) {
-        await fetch(`${BACKEND_URL}/decrease`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        console.log("📉 Лимит уменьшен через /decrease");
+      // ✅ Вычитаем лимит после отправки
+      try {
+        const email = window.egorych_user_email || localStorage.getItem('egorych_email');
+        if (email) {
+          const decRes = await fetch(`${BACKEND_URL}/decrease`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+          });
+          const decData = await decRes.json();
+          console.log("✅ Лимит успешно уменьшен:", decData);
+        } else {
+          console.warn("⚠️ Нет email для уменьшения лимита");
+        }
+      } catch (err) {
+        console.error("❌ Ошибка уменьшения лимита", err);
       }
 
     } catch {
@@ -222,7 +228,6 @@ async function send() {
 
 sendBtn.addEventListener("click", send);
 
-// === Озвучка ===
 async function speak(text) {
   try {
     const res = await fetch(`${BACKEND_URL}/speak`, {
