@@ -12,9 +12,14 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-window.addEventListener("DOMContentLoaded", async () => {
-  const email = localStorage.getItem("egorych_email") || "";
-  console.log("📩 Email из localStorage:", email);
+// ✅ Приём email от родительского iframe
+window.addEventListener("message", (event) => {
+  if (event.data?.type === "SET_EMAIL" && event.data.email) {
+    localStorage.setItem("egorych_email", event.data.email);
+    window.egorych_user_email = event.data.email;
+    console.log("📥 Email получен через postMessage:", event.data.email);
+  }
+});
 
   if (!email) {
     console.warn("⚠️ Email отсутствует в localStorage");
