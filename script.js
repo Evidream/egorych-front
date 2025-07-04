@@ -1,5 +1,3 @@
-// === ВЕРСИЯ С ВЫЧИТАНИЕМ ИЗ ЛИМИТА ===
-
 const chat = document.getElementById("chat");
 const chatWrapper = document.getElementById("chat-wrapper");
 const textInput = document.getElementById("textInput");
@@ -14,8 +12,55 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-window.addEventListener("DOMContentLoaded", () => {
-  appendMessage("Привет, роднуля! 👋 Как дела? Напиши что-нибудь!", "bot");
+window.addEventListener("DOMContentLoaded", async () => {
+  const email = localStorage.getItem("egorych_email") || "";
+  console.log("📩 Email из localStorage:", email);
+
+  if (!email) {
+    console.warn("⚠️ Email отсутствует в localStorage");
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
+    if (!res.ok) {
+      throw new Error(`Ошибка запроса: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log("📦 Ответ от /user-info:", data);
+
+    if (!data || !data.plan) {
+      console.warn("⚠️ План отсутствует в ответе");
+      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+      return;
+    }
+
+    const plan = data.plan;
+    console.log("🍺 Тариф пользователя:", plan);
+
+    switch (plan) {
+      case "guest":
+        appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
+        break;
+      case "user":
+        appendMessage("Добро пожаловать, базовый план! У тебя 50 сообщений.", "bot");
+        break;
+      case "beer":
+        appendMessage("План ПИВО! Осталось 500 сообщений 🍺", "bot");
+        break;
+      case "whisky":
+        appendMessage("План ВИСКИ! Ты бессмертен, родной 🥃", "bot");
+        break;
+      default:
+        appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+        break;
+    }
+  } catch (error) {
+    console.error("❌ Ошибка при получении данных:", error);
+    appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+  }
 });
 
 textInput.addEventListener("keydown", (e) => {
@@ -115,14 +160,10 @@ function appendMessage(text, sender) {
     wrapper.appendChild(listenBtn);
 
     chat.appendChild(wrapper);
-
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
+    setTimeout(() => wrapper.classList.add("show"), 50);
 
     typeText(bubble, text);
     lastBotReply = text;
-
   } else {
     const bubble = document.createElement("div");
     bubble.className = "bubble-user";
@@ -135,9 +176,7 @@ function appendMessage(text, sender) {
     wrapper.appendChild(circle);
 
     chat.appendChild(wrapper);
-    setTimeout(() => {
-      wrapper.classList.add("show");
-    }, 50);
+    setTimeout(() => wrapper.classList.add("show"), 50);
   }
 
   chatWrapper.scrollTop = chatWrapper.scrollHeight;
@@ -148,6 +187,27 @@ function typeText(element, text, i = 0) {
     element.textContent += text.charAt(i);
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
     setTimeout(() => typeText(element, text, i + 1), 20);
+  }
+}
+
+async function decreaseEgorychLimit() {
+  const email = localStorage.getItem("egorych_email");
+  console.log("🔁 Пытаемся уменьшить лимит для:", email);
+  if (!email) {
+    console.warn("⚠️ Email не найден в localStorage");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/decrease`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    console.log("✅ Ответ от /decrease:", json);
+  } catch (err) {
+    console.error("❌ Ошибка при уменьшении лимита:", err);
   }
 }
 
@@ -168,26 +228,7 @@ async function send() {
       });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
-
-      // ✅ Вычитаем лимит после отправки
-      try {
-        await new Promise(resolve => setTimeout(resolve, 300)); // пауза 300 мс
-const email = window.egorych_user_email || localStorage.getItem('egorych_email');
-        if (email) {
-          const decRes = await fetch(`${BACKEND_URL}/decrease`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
-          });
-          const decData = await decRes.json();
-          console.log("✅ Лимит успешно уменьшен:", decData);
-        } else {
-          console.warn("⚠️ Нет email для уменьшения лимита");
-        }
-      } catch (err) {
-        console.error("❌ Ошибка уменьшения лимита", err);
-      }
-
+      await decreaseEgorychLimit();
     } catch {
       appendMessage("❌ Ошибка ответа", "bot");
     }
@@ -214,6 +255,7 @@ const email = window.egorych_user_email || localStorage.getItem('egorych_email')
         });
         const visionData = await visionRes.json();
         appendMessage(visionData.reply || "🤖 Егорыч посмотрел, но ничего не понял.", "bot");
+        await decreaseEgorychLimit();
       } else {
         appendMessage("❌ Ошибка загрузки файла", "bot");
       }
