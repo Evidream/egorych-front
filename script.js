@@ -12,51 +12,32 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-let userEmail = ""; // 🆕 приоритет: window → localStorage → URL
-
 window.addEventListener("DOMContentLoaded", async () => {
-  // 1️⃣ Из window (самый приоритетный)
-  if (window.egorychEmail) {
-    userEmail = window.egorychEmail;
-    console.log("✅ Email из window.egorychEmail:", userEmail);
-  }
+  const email = localStorage.getItem("egorych_email") || "";
+  console.log("📩 Email из localStorage:", email);
 
-  // 2️⃣ Если не нашли — пробуем localStorage
-  if (!userEmail) {
-    const local = localStorage.getItem("egorych_email");
-    if (local) {
-      userEmail = local;
-      console.log("✅ Email из localStorage:", userEmail);
-    }
-  }
-
-  // 3️⃣ Если всё ещё пусто — парсим из URL
-  if (!userEmail) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const emailFromUrl = urlParams.get("email");
-    if (emailFromUrl) {
-      userEmail = emailFromUrl;
-      console.log("✅ Email из URL:", userEmail);
-    }
-  }
-
-  // 4️⃣ Сохраняем, если нашли
-  if (userEmail) {
-    localStorage.setItem("egorych_email", userEmail);
-  } else {
-    console.warn("⚠️ Email не найден");
+  if (!email) {
+    console.warn("⚠️ Email отсутствует в localStorage");
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
     return;
   }
 
   try {
-    const res = await fetch(`${BACKEND_URL}/user-info?email=${userEmail}`);
-    if (!res.ok) throw new Error(`Ошибка запроса: ${res.status}`);
+    const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
+    if (!res.ok) {
+      throw new Error(`Ошибка запроса: ${res.status}`);
+    }
 
     const data = await res.json();
     console.log("📦 Ответ от /user-info:", data);
 
-    const plan = data?.plan || "unknown";
+    if (!data || !data.plan) {
+      console.warn("⚠️ План отсутствует в ответе");
+      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+      return;
+    }
+
+    const plan = data.plan;
     console.log("🍺 Тариф пользователя:", plan);
 
     switch (plan) {
@@ -74,14 +55,13 @@ window.addEventListener("DOMContentLoaded", async () => {
         break;
       default:
         appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
+        break;
     }
   } catch (error) {
     console.error("❌ Ошибка при получении данных:", error);
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
   }
 });
-
-// ... всё остальное (events, camera, send, speak и т.д.) остаётся без изменений
 
 textInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
@@ -211,8 +191,10 @@ function typeText(element, text, i = 0) {
 }
 
 async function decreaseEgorychLimit() {
-  if (!userEmail) {
-    console.warn("⚠️ Email не установлен");
+  const email = localStorage.getItem("egorych_email");
+  console.log("🔁 Пытаемся уменьшить лимит для:", email);
+  if (!email) {
+    console.warn("⚠️ Email не найден в localStorage");
     return;
   }
 
@@ -220,7 +202,7 @@ async function decreaseEgorychLimit() {
     const res = await fetch(`${BACKEND_URL}/decrease`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userEmail }),
+      body: JSON.stringify({ email }),
     });
     const json = await res.json();
     console.log("✅ Ответ от /decrease:", json);
@@ -239,16 +221,11 @@ async function send() {
     textInput.value = "";
 
     try {
-      const response = await fetch(`${backendUrl}/chat`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    text: message,
-    email: localStorage.getItem("userEmail") || null // или другой способ, как ты сохраняешь email
-  }),
-});
+      const res = await fetch(`${BACKEND_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
       await decreaseEgorychLimit();
