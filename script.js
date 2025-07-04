@@ -12,7 +12,22 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// ✅ Приём email от родительского iframe
+// ✅ Попытка автоматически получить email из сессии Supabase
+(async () => {
+  try {
+    const res = await fetch(`${BACKEND_URL}/session`);
+    const data = await res.json();
+    if (data?.user?.email) {
+      localStorage.setItem("egorych_email", data.user.email);
+      window.egorych_user_email = data.user.email;
+      console.log("📥 Email получен из /session:", data.user.email);
+    }
+  } catch (e) {
+    console.warn("⚠️ Не удалось получить email из /session");
+  }
+})();
+
+// ✅ Приём email от родительского iframe (если он придёт)
 window.addEventListener("message", (event) => {
   if (event.data?.type === "SET_EMAIL" && event.data.email) {
     localStorage.setItem("egorych_email", event.data.email);
@@ -34,22 +49,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const res = await fetch(`${BACKEND_URL}/user-info?email=${email}`);
-    if (!res.ok) {
-      throw new Error(`Ошибка запроса: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`Ошибка запроса: ${res.status}`);
     const data = await res.json();
     console.log("📦 Ответ от /user-info:", data);
 
-    if (!data || !data.plan) {
-      console.warn("⚠️ План отсутствует в ответе");
-      appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-      return;
-    }
-
     const plan = data.plan;
-    console.log("🍺 Тариф пользователя:", plan);
-
     switch (plan) {
       case "guest":
         appendMessage("Привет, гость! У тебя 20 сообщений.", "bot");
@@ -65,7 +69,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         break;
       default:
         appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
-        break;
     }
   } catch (error) {
     console.error("❌ Ошибка при получении данных:", error);
@@ -105,9 +108,7 @@ function openCamera() {
       video.srcObject = stream;
       document.getElementById("cameraPreview").style.display = "block";
     })
-    .catch(() => {
-      appendMessage("🚫 Нет доступа к камере", "bot");
-    });
+    .catch(() => appendMessage("🚫 Нет доступа к камере", "bot"));
 }
 
 function takePhoto() {
@@ -154,7 +155,6 @@ function appendMessage(text, sender) {
 
     const measuredWidth = Math.min(measure.offsetWidth + 40, 767);
     bubble.style.width = measuredWidth + "px";
-
     document.body.removeChild(measure);
 
     bubble.textContent = "";
@@ -168,10 +168,8 @@ function appendMessage(text, sender) {
     wrapper.appendChild(circle);
     wrapper.appendChild(bubble);
     wrapper.appendChild(listenBtn);
-
     chat.appendChild(wrapper);
     setTimeout(() => wrapper.classList.add("show"), 50);
-
     typeText(bubble, text);
     lastBotReply = text;
   } else {
@@ -184,7 +182,6 @@ function appendMessage(text, sender) {
 
     wrapper.appendChild(bubble);
     wrapper.appendChild(circle);
-
     chat.appendChild(wrapper);
     setTimeout(() => wrapper.classList.add("show"), 50);
   }
@@ -203,10 +200,7 @@ function typeText(element, text, i = 0) {
 async function decreaseEgorychLimit() {
   const email = localStorage.getItem("egorych_email");
   console.log("🔁 Пытаемся уменьшить лимит для:", email);
-  if (!email) {
-    console.warn("⚠️ Email не найден в localStorage");
-    return;
-  }
+  if (!email) return;
 
   try {
     const res = await fetch(`${BACKEND_URL}/decrease`, {
