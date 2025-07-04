@@ -21,6 +21,11 @@ window.addEventListener("message", (event) => {
   }
 });
 
+// ✅ Стартовое сообщение в зависимости от тарифа
+window.addEventListener("DOMContentLoaded", async () => {
+  const email = localStorage.getItem("egorych_email");
+  console.log("📩 Email из localStorage:", email);
+
   if (!email) {
     console.warn("⚠️ Email отсутствует в localStorage");
     appendMessage("Привет! Напиши что-нибудь ✍️", "bot");
