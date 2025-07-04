@@ -22,6 +22,13 @@ const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
       window.egorych_user_email = data.user.email;
       console.log("📥 Email получен из /session:", data.user.email);
     }
+    
+    if (data?.session?.access_token) {
+  window.egorych_token = data.session.access_token;
+  localStorage.setItem("egorych_token", data.session.access_token);
+  console.log("📦 Токен получен из /session:", data.session.access_token);
+}
+    
   } catch (e) {
     console.warn("⚠️ Не удалось получить email из /session");
   }
@@ -32,7 +39,13 @@ window.addEventListener("message", (event) => {
   if (event.data?.type === "SET_EMAIL" && event.data.email) {
     localStorage.setItem("egorych_email", event.data.email);
     window.egorych_user_email = event.data.email;
-    console.log("📥 Email получен через postMessage:", event.data.email);
+    console.log("📬 Email получен через postMessage:", event.data.email);
+
+    if (event.data.token) {
+      window.egorych_token = event.data.token;
+      localStorage.setItem("egorych_token", event.data.token);
+      console.log("📦 Токен получен через postMessage:", event.data.token);
+    }
   }
 });
 
