@@ -171,7 +171,8 @@ async function send() {
 
       // ✅ Вычитаем лимит после отправки
       try {
-        const email = window.egorych_user_email || localStorage.getItem('egorych_email');
+        await new Promise(resolve => setTimeout(resolve, 300)); // пауза 300 мс
+const email = window.egorych_user_email || localStorage.getItem('egorych_email');
         if (email) {
           const decRes = await fetch(`${BACKEND_URL}/decrease`, {
             method: "POST",
