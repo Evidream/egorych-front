@@ -239,11 +239,16 @@ async function send() {
     textInput.value = "";
 
     try {
-      const res = await fetch(`${BACKEND_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
+      const response = await fetch(`${backendUrl}/chat`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    text: message,
+    email: localStorage.getItem("userEmail") || null // или другой способ, как ты сохраняешь email
+  }),
+});
       const data = await res.json();
       appendMessage(data.reply || "🤖 Егорыч молчит...", "bot");
       await decreaseEgorychLimit();
