@@ -12,7 +12,7 @@ let isSending = false;
 
 const BACKEND_URL = "https://egorych-backend-production.up.railway.app";
 
-// ✅ Попытка автоматически получить email из сессии Supabase
+// ✅ Попытка автоматически получить email из сессии Supabase сразу
 (async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/session`);
@@ -38,7 +38,24 @@ window.addEventListener("message", (event) => {
 
 // ✅ Стартовое сообщение в зависимости от тарифа
 window.addEventListener("DOMContentLoaded", async () => {
-  const email = localStorage.getItem("egorych_email");
+  let email = localStorage.getItem("egorych_email");
+
+  // 🔁 Повторная попытка получить email из /session
+  if (!email) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/session`);
+      const data = await res.json();
+      if (data?.user?.email) {
+        email = data.user.email;
+        localStorage.setItem("egorych_email", email);
+        window.egorych_user_email = email;
+        console.log("📥 Email ДОполучен из /session:", email);
+      }
+    } catch (e) {
+      console.warn("⚠️ Повторная попытка /session не удалась");
+    }
+  }
+
   console.log("📩 Email из localStorage:", email);
 
   if (!email) {
